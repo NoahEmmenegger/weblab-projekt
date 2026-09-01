@@ -10,7 +10,7 @@
     by: "von",
     from: "von",
     name-combine: "und",
-    place: "Luzern (Schweiz)",
+    place: "Zug (Schweiz)",
     // Signature page
     title: "Titel",
     student: "Student",
@@ -25,9 +25,7 @@
     declaration: "Eidesstattliche Erklärung",
     declaration-text: "Ich erkläre hiermit, dass ich/wir die vorliegende Arbeit selbständig und ohne unerlaubte fremde Hilfe angefertigt habe/n. Alle verwendeten Quellen, Literatur und Hilfsmittel (insbesondere künstliche Intelligenz oder sonstige verwendete Instrumente) wurden urheberrechts- und datenschutzkonform verwendet und wörtlich oder inhaltlich entnommene Stellen als solche kenntlich gemacht. Das Vertraulichkeitsinteresse des Auftraggebers wurde gewahrt und die Urheberrechtsbestimmungen der Hochschule Luzern respektiert.",
     place-date-signature: "Ort / Datum, Unterschrift",
-    intellectual-property: [Geistiges Eigentum gemäss der #link(
-        "https://srl.lu.ch/app/de/texts_of_law/521/versions/3884",
-      )[Studienordnung] für die Ausbildung an der Hochschule Luzern, FH Zentralschweiz],
+    intellectual-property: [Geistiges Eigentum von Noah Emmenegger],
     page-number-format: "1 von 1",
     // Outlines
     table-of-contents: "Inhaltsverzeichnis",

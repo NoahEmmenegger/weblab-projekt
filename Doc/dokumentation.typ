@@ -2,7 +2,7 @@
 
 #show: basic-thesis.with(
   logo: image("assets/images/hslu-logo.svg", width: 30%),
-  title: "Projekttitel",
+  title: "Faire Wohnungsvergabe Tool",
   students: (
     "Noah Emmenegger",
   ),
