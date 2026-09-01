@@ -4,7 +4,7 @@
   logo: image("assets/images/hslu-logo.svg", width: 30%),
   title: "Projekttitel",
   students: (
-    "Vorname Nachname",
+    "Noah Emmenegger",
   ),
   year: "2026",
   institution: "HSLU",
@@ -12,6 +12,7 @@
   supervisor: "Dozent/in",
   expert: "",
   client: "Web Programming Lab",
+  show-declaration: false,
   language: "de",
   thesis-type: "Web Programming Lab Projekt",
   bibliography: include "outlines/bibliography.typ",

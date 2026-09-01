@@ -40,6 +40,7 @@
   client: "",
   public: false,
   secret: false,
+  show-declaration: true,
   thesis-type: "",
   scanned-signature-page: none,
   language: "de",
@@ -108,32 +109,25 @@
 
     document-property(title: t(language: language, key: "year"), info: year)
     document-property(title: t(language: language, key: "supervisor"), info: supervisor)
-    document-property(title: t(language: language, key: "expert"), info: expert)
     document-property(title: t(language: language, key: "client"), info: client)
 
     v(.5em)
 
-    text()[
 
-      *#t(language: language, key: "classification")*
-    ]
-    linebreak()
-    checkbox(info: t(language: language, key: "public"), checked: public)
-    linebreak()
-    checkbox(info: t(language: language, key: "confidential"), checked: secret)
+    if show-declaration {
+      v(2em)
 
-    v(2em)
+      text()[
 
-    text()[
+        *#t(language: language, key: "declaration")*
 
-      *#t(language: language, key: "declaration")*
+        #t(language: language, key: "declaration-text")
+      ]
 
-      #t(language: language, key: "declaration-text")
-    ]
-
-    for _ in students [
-      #signature(language: language)
-    ]
+      for _ in students [
+        #signature(language: language)
+      ]
+    }
 
     if gratitude != "" {
       pagebreak()
