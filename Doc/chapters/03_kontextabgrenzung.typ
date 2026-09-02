@@ -1,27 +1,44 @@
 = Kontextabgrenzung
 
+Dieses Kapitel grenzt die Wohnungsvergabe-Plattform von ihren Benutzergruppen und der technischen Umgebung ab. In der ersten Version bestehen keine Schnittstellen zu externen Fachsystemen oder Datenquellen.
+
 == Fachlicher Kontext
 
-// Ein Kontextdiagramm einfügen: System in der Mitte, Benutzer und Nachbarsysteme aussen.
-// Alle ein- und ausgehenden Informationen kurz beschreiben.
-
 #figure(
-  rect(width: 100%, inset: 18pt)[
-    *Platzhalter: fachliches Kontextdiagramm* \
-    Benutzer ↔ Webapplikation ↔ externe Systeme
-  ],
-  caption: [Fachlicher Kontext],
+  grid(
+    columns: (1fr, auto, 1.4fr),
+    column-gutter: 12pt,
+    row-gutter: 12pt,
+    align(center + horizon, rect(width: 100%, inset: 10pt)[Mitarbeitende der Gesellschaft]),
+    align(center + horizon)[→],
+    align(center + horizon, rect(width: 100%, inset: 14pt)[*Wohnungsvergabe-Plattform*]),
+    align(center + horizon, rect(width: 100%, inset: 10pt)[Bewerber/innen]),
+    align(center + horizon)[↔],
+    align(center + horizon, rect(width: 100%, inset: 14pt)[*Wohnungsvergabe-Plattform*]),
+  ),
+  caption: [Fachlicher Kontext der Wohnungsvergabe-Plattform],
 )
 
 #table(
-  columns: (25%, 30%, 45%),
-  table.header([*Nachbar/Akteur*], [*Schnittstelle*], [*Ausgetauschte Information*]),
-  [Anwender/in], [Web-UI], [Erfasst und konsumiert fachliche Daten],
-  [[Nachbarsystem]], [[Protokoll/API]], [[Ein- und Ausgaben]],
+  columns: (27%, 25%, 48%),
+  table.header([*Akteur*], [*Schnittstelle*], [*Ausgetauschte Informationen*]),
+  [Mitarbeitende der Gesellschaft], [Geschützte Weboberfläche], [Ausschreibungen, Formulare, Kriterien, Gewichtungen, Musterbewerbungen, Bewerbungen, Auswahlstatus und Exporte],
+  [Bewerber/innen], [Öffentlich geteiltes Webformular, optional mit Zugangsschlüssel], [Formularfelder, Bewerbungsdaten und - je nach umgesetztem Umfang - Bewerbungsstatus],
 )
+
+Die Gesellschaft legt die Vergaberegeln fest und erhält die aufbereiteten Bewertungen. Bewerber/innen übermitteln ausschliesslich die im jeweiligen Formular verlangten Angaben. Die endgültige Vergabeentscheidung entsteht ausserhalb des Systems durch die verantwortliche Person; im System wird sie lediglich dokumentiert.
 
 == Technischer Kontext
 
-// Protokolle, Datenformate, Authentisierung und technische Kanäle präzisieren.
+Die Benutzer/innen greifen mit einem aktuellen Webbrowser über HTTPS auf die Anwendung zu. Frontend und Backend werden gemeinsam als Next.js-Anwendung betrieben. Das Backend persistiert die Daten über ein ORM in PostgreSQL. Datenexporte werden als Datei über die Weboberfläche bereitgestellt.
 
-[Beschreibung der technischen Schnittstellen und Systemgrenzen]
+#table(
+  columns: (25%, 27%, 48%),
+  table.header([*Kommunikationspartner*], [*Kanal/Protokoll*], [*Bemerkung*]),
+  [Browser der Mitarbeitenden], [HTTPS; HTML, CSS und JavaScript], [Zugriff auf den authentisierten Verwaltungsbereich],
+  [Browser der Bewerber/innen], [HTTPS; HTML, CSS und JavaScript], [Zugriff über einen Freigabelink; optional durch einen Zugangsschlüssel geschützt],
+  [PostgreSQL-Datenbank], [Datenbankprotokoll über ORM], [Persistenz für Ausschreibungen, Formulare, Kriterien, Bewerbungen und Bewertungen],
+  [Dateisystem des Browsers], [HTTPS-Download], [Export der Bewerbungen und ihrer Bewertungen],
+)
+
+Externe Datenquellen, soziale Netzwerke und KI-Dienste liegen ausserhalb der Systemgrenze und werden nicht angebunden.

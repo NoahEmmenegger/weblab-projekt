@@ -5,6 +5,7 @@
 // Qualitätsziele aus Kapitel 1 in Teilmerkmale zerlegen, z. B. Benutzbarkeit → responsiv, zugänglich.
 
 - Qualität
+  - Nachvollziehbarkeit: deterministische Bewertung, erklärbare Teilbewertungen
   - Benutzbarkeit: responsive Bedienung, verständliche Rückmeldungen
   - Änderbarkeit: klare Verantwortlichkeiten, automatisierte Tests
   - Zuverlässigkeit: Datenintegrität, kontrollierte Fehlerbehandlung
@@ -18,7 +19,8 @@
   [QS-01], [Performance], [Eine typische Seite wird in der Produktionsversion aufgerufen.], [Lighthouse-Durchschnitt ≥ 90, Mobile und Desktop], [Lighthouse-Bericht],
   [QS-02], [Benutzbarkeit], [Eine Kernfunktion wird auf einem kleinen Bildschirm ausgeführt.], [Ohne horizontales Scrollen; alle Aktionen erreichbar], [E2E/Manuell],
   [QS-03], [Zuverlässigkeit], [Ungültige Daten werden übermittelt.], [Keine inkonsistenten Daten; verständliche Fehlermeldung], [Integration/E2E],
-  [QS-04], [Änderbarkeit], [Eine neue Eigenschaft der Ressource wird ergänzt.], [Änderung bleibt auf klar abgegrenzte Bausteine beschränkt], [Review/Tests],
+  [QS-04], [Änderbarkeit], [Ein neues Bewertungskriterium oder ein neuer Formulartyp wird ergänzt.], [Änderung bleibt auf klar abgegrenzte Bausteine beschränkt], [Review/Tests],
+  [QS-05], [Nachvollziehbarkeit], [Eine gespeicherte Bewerbung wird automatisch bewertet.], [Gesamtwert ist aus Antworten, Kriterien und Gewichtungen reproduzierbar; alle Teilwerte werden ausgewiesen], [Unit-/E2E-Test],
 )
 
 == Evaluationsergebnisse
