@@ -1,15 +1,15 @@
 #set page(
   paper: "a4",
-  margin: 2.5cm,
+  margin: 2.2cm,
 )
 
 #set text(
-  size: 11pt,
+  size: 10.5pt,
 )
 
 #set heading(numbering: none)
 
-= Projektvorschlag
+= Projektvorschlag - Faire Wohnungsvergabe Tool
 
 == Kontext
 
@@ -62,17 +62,21 @@ Gewisse Immobiliengesellschaften und Genossenschaften möchten Wohnungsvergaben 
 
 == Angedachter Technologie-Stack
 
-Die Anwendung wird als webbasierter Monolith umgesetzt. Frontend und Backend befinden sich innerhalb derselben Next.js-Anwendung.
+Die Anwendung wird als webbasierter, modular strukturierter Monolith umgesetzt. Die ursprünglich vorgesehene Trennung in ein React-Frontend und ein separates Express-Backend wird nicht weiterverfolgt. Stattdessen bündelt Next.js Routing, Benutzeroberfläche und serverseitige Backend-Funktionalität in einer Anwendung. Die Daten werden in einer separaten PostgreSQL-Datenbank gespeichert.
 
-- *Framework:* Next.js
+- *Framework:* Next.js mit App Router
 - *Programmiersprache:* TypeScript
 - *Frontend:* React und Tailwind CSS
-- *Backend:* Next.js mit Node.js
+- *Backend:* Next.js Route Handlers und/oder Server Actions auf Node.js
 - *Datenbank:* PostgreSQL
-- *ORM:* Prisma oder Drizzle ORM
-- *Architektur:* Monolith
+- *ORM:* Drizzle ORM
+- *Architektur:* modular strukturierter Monolith mit separater Datenbank
 - *Authentifizierung:* einfache Benutzeranmeldung für Gesellschaften
-- *Deployment:* Docker
+- *Betrieb:* Docker Compose mit den Services `app` und `db`
 - *Versionsverwaltung:* Git / GitHub
 
-Die Bewertung der Bewerbungen wird regelbasiert und deterministisch umgesetzt. Die definierten Antworten einer Bewerbung werden mit den Kriterien der Ausschreibung verglichen und anhand der festgelegten Gewichtungen zu einer Gesamtbewertung zusammengeführt. Dadurch kann für jede Bewerbung nachvollzogen werden, weshalb sie im Ranking eine bestimmte Position erreicht.
+Next.js und PostgreSQL werden jeweils in einem Docker-Container betrieben und über Docker Compose verbunden. Ein persistentes Docker-Volume schützt die Datenbankdaten bei einem Neustart der Container. Die gesamte Anwendung soll aus dem Projektverzeichnis mit einem einzigen Befehl reproduzierbar gestartet werden können:
+
+```sh
+docker compose up --build
+```
