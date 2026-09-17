@@ -6,6 +6,8 @@ First, run the development server:
 
 ```bash
 npm run dev
+
+npm run devDB (um DB zu starten)
 # or
 yarn dev
 # or
@@ -17,6 +19,25 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Docker Compose
+
+The Compose setup starts the Next.js application and a PostgreSQL 17 database. The
+database persists its data in the named `postgres_data` volume. Create a local
+configuration and choose a secure password before using it outside development:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+In PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
+
+The application is available at [http://localhost:3000](http://localhost:3000)
+and PostgreSQL at `localhost:5432` by default. Inside the `web` container, the
+database is available through the `DATABASE_URL` environment variable. Stop the
+stack with `docker compose down`; use `docker compose down -v` only when you
+also want to delete the database data.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Creates a minimal self-contained Node.js server for the Docker image.
+  output: "standalone",
 };
 
 export default nextConfig;
