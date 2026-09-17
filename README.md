@@ -39,6 +39,19 @@ database is available through the `DATABASE_URL` environment variable. Stop the
 stack with `docker compose down`; use `docker compose down -v` only when you
 also want to delete the database data.
 
+## Database development
+
+Drizzle ORM uses `DATABASE_URL` from `.env` (or `.env.local`). Start PostgreSQL
+with `npm run devDB`, then manage committed migrations with:
+
+```bash
+npm run db:generate
+npm run db:migrate
+```
+
+Add tables as named exports in `db/schema.ts`; import `db` from `db/index.ts`
+only in server-side code. Run `npm run db:studio` to inspect the local database.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
