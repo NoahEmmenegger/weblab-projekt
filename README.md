@@ -52,6 +52,29 @@ npm run db:migrate
 Add tables as named exports in `db/schema.ts`; import `db` from `db/index.ts`
 only in server-side code. Run `npm run db:studio` to inspect the local database.
 
+## Example: database to API response
+
+`GET /api/applications` is a minimal end-to-end example:
+
+```text
+PostgreSQL table "applications"
+  -> db/schema.ts (Drizzle table definition)
+  -> db/index.ts (PostgreSQL connection + Drizzle client)
+  -> app/api/applications/route.ts (db.select().from(applications))
+  -> JSON response: { "applications": [...] }
+```
+
+Generate and apply the migration before calling the endpoint:
+
+```bash
+npm run db:generate
+npm run db:migrate
+```
+
+After creating one or more rows in Drizzle Studio, open
+[http://localhost:3000/api/applications](http://localhost:3000/api/applications)
+to see the records as JSON.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
