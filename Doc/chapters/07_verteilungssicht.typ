@@ -19,7 +19,7 @@
   table.header([*Knoten*], [*Artefakt*], [*Konfiguration/Verantwortung*]),
   [Client], [Aktueller Webbrowser], [Greift über den veröffentlichten Port der Next.js-Anwendung zu.],
   [Service `app`], [Next.js-Produktions-Bundle], [Enthält App Router, UI und Backend; erhält die Datenbank-URL und veröffentlicht Port 3000.],
-  [Service `db`], [PostgreSQL-Image, Schema und Daten], [Nur intern erreichbar; Konfiguration über Umgebungsvariablen; Healthcheck meldet Bereitschaft.],
+  [Service `db`], [PostgreSQL-Image, Schema und Daten], [Über das Compose-Netzwerk für `app` sowie lokal ausschliesslich an `127.0.0.1` erreichbar; Konfiguration über Umgebungsvariablen; Healthcheck meldet Bereitschaft.],
   [Docker-Volume], [PostgreSQL-Datenverzeichnis], [Persistiert Daten bei einer Container-Neuerstellung. Backup und Restore sind vor dem Produktivbetrieb zu ergänzen.],
 )
 
@@ -32,3 +32,5 @@ docker compose up --build
 ```
 
 Der Befehl baut die Next.js-Anwendung und startet sowohl `app` als auch `db`. Die Anwendung ist anschliessend über den veröffentlichten Web-Port erreichbar. Gestoppt wird der Stack mit `docker compose down`; das Datenbank-Volume bleibt dabei erhalten.
+
+Migrationen sind bewusst kein Bestandteil des Container-Starts. Nach einer Schemaänderung werden sie mit `npm run db:generate` erzeugt und mit `npm run db:migrate` kontrolliert angewendet. Dadurch wird ein Datenbankschema nicht unbemerkt beim Start eines Web-Containers verändert.

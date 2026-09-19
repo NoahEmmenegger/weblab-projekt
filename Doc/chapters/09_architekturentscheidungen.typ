@@ -27,3 +27,17 @@ Entscheidungen werden als kurze Architecture Decision Records (ADR) festgehalten
   [*Begründung*], [PostgreSQL unterstützt relationale Integrität und Transaktionen für das verknüpfte Fachmodell. Docker Compose vereinheitlicht Versionen und Startablauf, ohne eine lokal installierte Datenbank vorauszusetzen.],
   [*Konsequenzen*], [Docker ist für die lokale Ausführung erforderlich und benötigt zusätzliche Ressourcen. Datenbankmigrationen, Secrets sowie Backup und Restore bleiben explizite Betriebsaufgaben. Der Datenbankport wird standardmässig nicht nach aussen veröffentlicht; ein Volume verhindert Datenverlust bei einer Neuerstellung des Containers.],
 )
+
+#pagebreak(weak: true)
+
+== ADR-003: Drizzle ORM statt Prisma
+
+#table(
+  columns: (25%, 75%),
+  [*Status*], [Akzeptiert am 18. September 2026],
+  [*Kontext*], [Die Next.js-Anwendung benötigt einen typsicheren Zugriff auf PostgreSQL sowie versionierte Migrationen. Der technische Kern soll klein bleiben und SQL-Abfragen nachvollziehbar machen.],
+  [*Betrachtete Optionen*], [1. Direkter Zugriff mit `pg`; 2. Prisma; 3. Drizzle ORM.],
+  [*Entscheidung*], [Drizzle ORM wird mit dem `node-postgres`-Treiber eingesetzt. Tabellen werden in `db/schema.ts` definiert; Drizzle Kit erzeugt und wendet Migrationen im Verzeichnis `drizzle/` an.],
+  [*Begründung*], [Drizzle verbindet aus dem TypeScript-Schema abgeleitete Typen mit SQL-nahen Abfragen. Gegenüber Prisma benötigt es keinen zusätzlichen Generierungsschritt für einen Client und hält die Abfragen für das kleine Projekt direkt lesbar. Gegenüber reinem `pg` reduziert es wiederholte Typdefinitionen und strukturiert Schema-Migrationen.],
+  [*Konsequenzen*], [Datenbankzugriff bleibt auf Node.js-Routen beschränkt. Schemaänderungen benötigen weiterhin eine erzeugte und kontrolliert angewendete Migration. Teammitglieder müssen die Drizzle-Abfrage- und Migrationskonventionen kennen.],
+)

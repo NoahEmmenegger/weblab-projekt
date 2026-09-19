@@ -37,3 +37,5 @@ Die Fachmodule kennen weder React-Komponenten noch HTTP-Details. Sie enthalten d
 == Ebene 2: Persistenz
 
 Das ORM bildet das relationale PostgreSQL-Schema auf TypeScript-Typen ab und verwaltet Migrationen. Zusammengehörige Änderungen, etwa das Speichern einer Bewerbung mit ihren Antworten und Bewertungsergebnissen, werden in einer Transaktion ausgeführt. Nur serverseitiger Code erhält Zugriff auf die Datenbankverbindung.
+
+Der aktuelle Schema-Ausschnitt enthält die Tabelle `applications` mit Identifikator, Bewerbername, Status und Erstellzeitpunkt. `db/schema.ts` ist die verbindliche Drizzle-Definition; die erzeugte SQL-Migration liegt versioniert im Verzeichnis `drizzle/`. Der Pool und Drizzle-Client befinden sich in `db/index.ts` und werden nicht in Client Components importiert.

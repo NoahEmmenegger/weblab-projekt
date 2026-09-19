@@ -11,7 +11,7 @@ Dieses Kapitel fasst die grundlegenden Entscheidungen zusammen, mit denen die fa
   [Benutzeroberfläche], [React und Tailwind CSS], [Komponentenbasierte Umsetzung der Verwaltungsoberfläche und der dynamischen, responsiven Bewerbungsformulare.],
   [Backend], [Next.js Route Handlers und/oder Server Actions auf Node.js], [Serverseitige Validierung, Fachlogik und Datenzugriff bleiben innerhalb des Monolithen gebündelt; ein separater Express-Service entfällt.],
   [Datenbank], [PostgreSQL], [Relationale und transaktionale Speicherung der miteinander verknüpften Ausschreibungen, Kriterien und Bewerbungen.],
-  [Datenzugriff], [Drizzle ORM; Entscheid offen], [Typsicherer Datenzugriff und nachvollziehbare Schema-Migrationen; die konkrete Bibliothek wird in einem ADR entschieden.],
+  [Datenzugriff], [Drizzle ORM], [Typsicherer, SQL-naher Datenzugriff; Tabellen und Migrationen bleiben direkt bei den TypeScript-Modellen.],
   [Authentisierung], [Einfache Benutzeranmeldung für Gesellschaften], [Schützt den Verwaltungsbereich; öffentlich geteilte Formulare können zusätzlich einen Zugangsschlüssel verlangen.],
   [Tests], [Unit-, Integrations- und E2E-Tests; Werkzeuge noch offen], [Die deterministische Bewertungslogik, Datenintegrität und zentralen Benutzerabläufe werden automatisiert abgesichert.],
   [Betrieb], [Docker Compose], [Startet Next.js und PostgreSQL als getrennte, intern vernetzte Services mit einem Befehl. Ein Volume persistiert die Datenbankdaten.],
@@ -27,6 +27,8 @@ Next.js Server Components sind der Standard für Layouts und nicht interaktive D
 Die Bewertung einer Bewerbung erfolgt regelbasiert und deterministisch. Antworten werden mit den vor Beginn einer Ausschreibung festgelegten Kriterien verglichen und anhand der gespeicherten Gewichtungen zu einer Gesamtbewertung zusammengeführt. Kriterien und Gewichtungen werden mit dem Start der Ausschreibung gesperrt. Neben dem Gesamtwert speichert beziehungsweise liefert die Anwendung die Beiträge der einzelnen Kriterien, damit das Ranking jederzeit erklärt und mit Berechnungsbeispielen getestet werden kann.
 
 PostgreSQL stellt die konsistente Persistenz der fachlichen Daten sicher. Schreiboperationen werden serverseitig validiert und für zusammengehörige Änderungen transaktional ausgeführt. Docker Compose beschreibt die beiden Laufzeitservices `app` und `db`, ihr internes Netzwerk, die Datenbankkonfiguration und ein persistentes Volume. Responsive Komponenten, automatisierte Tests der risikoreichen Abläufe und regelmässige Lighthouse-Messungen unterstützen die Qualitätsziele Benutzbarkeit, Zuverlässigkeit und Änderbarkeit.
+
+Im aktuellen Stand ist der technische Datenfluss mit der Tabelle `applications` umgesetzt: Eine Route Handler-Abfrage liest Daten über Drizzle aus PostgreSQL und liefert sie als JSON unter `GET /api/applications`. Dies validiert Verbindung, Migration, ORM und API-Schnittstelle als durchgängigen Kern.
 
 == Entwicklungsvorgehen
 

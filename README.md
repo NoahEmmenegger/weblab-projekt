@@ -34,7 +34,7 @@ docker compose up --build
 In PowerShell, use `Copy-Item .env.example .env` instead of `cp`.
 
 The application is available at [http://localhost:3000](http://localhost:3000)
-and PostgreSQL at `localhost:5432` by default. Inside the `web` container, the
+and PostgreSQL at `localhost:5432` by default (bound to the local machine only). Inside the `app` container, the
 database is available through the `DATABASE_URL` environment variable. Stop the
 stack with `docker compose down`; use `docker compose down -v` only when you
 also want to delete the database data.
@@ -48,6 +48,8 @@ with `npm run devDB`, then manage committed migrations with:
 npm run db:generate
 npm run db:migrate
 ```
+
+Migrations deliberately do not run automatically when the web container starts.
 
 Add tables as named exports in `db/schema.ts`; import `db` from `db/index.ts`
 only in server-side code. Run `npm run db:studio` to inspect the local database.

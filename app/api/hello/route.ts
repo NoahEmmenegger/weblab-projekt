@@ -1,5 +1,5 @@
 export async function GET() {
   return Response.json({
-    projectName: 'Next.js',
-  })
+    message: "Hello from the Wohnungsvergabe API.",
+  });
 }

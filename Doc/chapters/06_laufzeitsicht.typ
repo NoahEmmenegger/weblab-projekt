@@ -20,3 +20,10 @@
 1. `docker compose up --build` startet die Services `db` und `app`.
 2. PostgreSQL initialisiert das Datenverzeichnis und meldet seinen Zustand über einen Healthcheck.
 3. Die Next.js-Anwendung startet nach erfolgreichem Healthcheck und verbindet sich über den Servicenamen `db`. Schlägt dies fehl, beendet sie sich mit einem sichtbaren Fehler, statt Anfragen in einem unvollständigen Zustand zu verarbeiten.
+
+== Aktueller API-Datenfluss
+
+1. Ein Client ruft `GET /api/applications` auf.
+2. Der Route Handler verwendet den serverseitigen Drizzle-Client und führt eine sortierte `SELECT`-Abfrage auf `applications` aus.
+3. Bei Erfolg antwortet die Route mit `{ applications: [...] }` und `Cache-Control: no-store`.
+4. Bei einem unerwarteten Datenbankfehler wird der technische Fehler serverseitig protokolliert; der Client erhält eine allgemeine HTTP-500-Antwort ohne Verbindungsdetails.
