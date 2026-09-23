@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 import type { Apartment } from "@/db/queries/apartments";
+import type { FieldType, ApplicationField, ListingDraft } from "@/lib/listing-types";
 
-export type FieldType = "text" | "number" | "email" | "date" | "textarea" | "checkbox";
-export type ApplicationField = { id: string; label: string; type: FieldType; required: boolean };
-export type ListingDraft = { title: string; description: string; fields: ApplicationField[] };
 
 const fieldTypes: { value: FieldType; label: string }[] = [
   { value: "text", label: "Kurzer Text" },
@@ -25,7 +23,7 @@ export function ListingDialog({ apartment, draft, onClose, onSave }: {
   apartment: Apartment;
   draft?: ListingDraft;
   onClose: () => void;
-  onSave: (draft: ListingDraft) => void;
+  onSave: (draft: ListingDraft) => Promise<void>;
 }) {
   const [title, setTitle] = useState(draft?.title ?? apartment.name);
   const [description, setDescription] = useState(draft?.description ?? "");
@@ -36,17 +34,24 @@ export function ListingDialog({ apartment, draft, onClose, onSave }: {
   ]);
   const [tab, setTab] = useState<"edit" | "preview">("edit");
   const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
 
   function updateField(id: string, changes: Partial<ApplicationField>) {
     setFields((current) => current.map((field) => field.id === id ? { ...field, ...changes } : field));
     setError("");
   }
 
-  function save() {
+  async function save() {
     if (!title.trim()) { setError("Gib einen Titel für die Ausschreibung ein."); setTab("edit"); return; }
     if (fields.some((field) => !field.label.trim())) { setError("Jedes Formularfeld braucht eine Bezeichnung."); setTab("edit"); return; }
-    onSave({ title: title.trim(), description: description.trim(), fields: fields.map((field) => ({ ...field, label: field.label.trim() })) });
-    onClose();
+    setPending(true);
+    setError("");
+    try {
+      await onSave({ title: title.trim(), description: description.trim(), fields: fields.map((field) => ({ ...field, label: field.label.trim() })) });
+      onClose();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Speichern fehlgeschlagen.");
+    } finally { setPending(false); }
   }
 
   return <div className="modal-backdrop listing-backdrop" role="presentation" onMouseDown={onClose}>
@@ -54,7 +59,7 @@ export function ListingDialog({ apartment, draft, onClose, onSave }: {
       <button type="button" className="close-button" onClick={onClose} aria-label="Schliessen">×</button>
       <p className="eyebrow">AUSSCHREIBUNG · {apartment.unitIdentifier}</p>
       <h2 id="listing-dialog-title">{draft ? "Ausschreibung bearbeiten" : "Ausschreibung erstellen"}</h2>
-      <p className="modal-copy">Gestalte das Bewerbungsformular für {apartment.name}. Dieser Entwurf ist nur eine Frontend-Vorschau.</p>
+      <p className="modal-copy">Gestalte das Bewerbungsformular für {apartment.name}. Nach dem Speichern kannst du die Ausschreibung veröffentlichen.</p>
 
       <div className="listing-tabs" role="tablist" aria-label="Ausschreibungsansicht">
         <button type="button" role="tab" aria-selected={tab === "edit"} className={tab === "edit" ? "active" : ""} onClick={() => setTab("edit")}>Bearbeiten</button>
@@ -84,7 +89,7 @@ export function ListingDialog({ apartment, draft, onClose, onSave }: {
       </div>}
 
       {error && <p className="form-error" role="alert">{error}</p>}
-      <div className="modal-actions listing-actions"><button type="button" className="button secondary" onClick={onClose}>Abbrechen</button><button type="button" className="button primary" onClick={save}>Entwurf übernehmen</button></div>
+      <div className="modal-actions listing-actions"><button type="button" className="button secondary" onClick={onClose}>Abbrechen</button><button type="button" className="button primary" onClick={save} disabled={pending}>{pending ? "Speichern …" : "Entwurf speichern"}</button></div>
     </section>
   </div>;
 }

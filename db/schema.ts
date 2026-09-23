@@ -1,4 +1,5 @@
-import { index, integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import type { ApplicationAnswer, ApplicationField } from "@/lib/listing-types";
 
 // Keep one named export per table so drizzle-kit can generate migrations.
 // This is a small end-to-end example for the application API.
@@ -46,3 +47,22 @@ export const apartments = pgTable("apartments", {
   index("apartments_company_id_idx").on(table.companyId),
   unique("apartments_company_unit_identifier_unique").on(table.companyId, table.unitIdentifier),
 ]);
+
+export const listings = pgTable("listings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  apartmentId: uuid("apartment_id").notNull().references(() => apartments.id, { onDelete: "cascade" }).unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  fields: jsonb("fields").$type<ApplicationField[]>().notNull(),
+  isPublished: boolean("is_published").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const listingApplications = pgTable("listing_applications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  listingId: uuid("listing_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
+  answers: jsonb("answers").$type<Record<string, ApplicationAnswer>>().notNull(),
+  fields: jsonb("fields").$type<ApplicationField[]>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [index("listing_applications_listing_id_idx").on(table.listingId)]);

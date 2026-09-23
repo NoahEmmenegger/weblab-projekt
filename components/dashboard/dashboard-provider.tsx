@@ -3,7 +3,9 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { createCompany as createCompanyAction, updateCompany as updateCompanyAction, type Company } from "@/app/actions/companies";
 import { createApartment as createApartmentAction, updateApartment as updateApartmentAction, deleteApartment as deleteApartmentAction } from "@/app/actions/apartments";
+import { publishListing as publishListingAction, saveListing as saveListingAction } from "@/app/actions/listings";
 import type { Apartment } from "@/db/queries/apartments";
+import type { Listing, ListingDraft } from "@/lib/listing-types";
 
 type Account = { id: string; name: string; email: string };
 type DashboardContextValue = {
@@ -17,13 +19,17 @@ type DashboardContextValue = {
   createApartment: (name: string, unitIdentifier: string, rooms: number, location: string) => Promise<void>;
   updateApartment: (apartmentId: string, name: string, unitIdentifier: string, rooms: number, location: string) => Promise<void>;
   deleteApartment: (apartmentId: string) => Promise<void>;
+  listings: Listing[];
+  saveListing: (apartmentId: string, draft: ListingDraft) => Promise<void>;
+  publishListing: (listingId: string, isPublished: boolean) => Promise<void>;
 };
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
 
-export function DashboardProvider({ children, account, initialCompanies, initialApartments }: { children: ReactNode; account: Account; initialCompanies: Company[]; initialApartments: Apartment[] }) {
+export function DashboardProvider({ children, account, initialCompanies, initialApartments, initialListings }: { children: ReactNode; account: Account; initialCompanies: Company[]; initialApartments: Apartment[]; initialListings: Listing[] }) {
   const [companies, setCompanies] = useState(initialCompanies);
   const [apartments, setApartments] = useState(initialApartments);
+  const [listings, setListings] = useState(initialListings);
   const [activeCompanyId, setActiveCompanyId] = useState(initialCompanies[0]?.id ?? "");
   const activeCompany = companies.find((company) => company.id === activeCompanyId) ?? companies[0] ?? null;
 
@@ -54,8 +60,18 @@ export function DashboardProvider({ children, account, initialCompanies, initial
     async deleteApartment(apartmentId) {
       await deleteApartmentAction(apartmentId);
       setApartments((current) => current.filter((apartment) => apartment.id !== apartmentId));
+      setListings((current) => current.filter((listing) => listing.apartmentId !== apartmentId));
     },
-  }), [account, companies, apartments, activeCompany]);
+    listings: listings.filter((listing) => apartments.some((apartment) => apartment.id === listing.apartmentId && apartment.companyId === activeCompany?.id)),
+    async saveListing(apartmentId, draft) {
+      const listing = await saveListingAction(apartmentId, draft);
+      setListings((current) => [...current.filter((item) => item.id !== listing.id), listing]);
+    },
+    async publishListing(listingId, isPublished) {
+      const listing = await publishListingAction(listingId, isPublished);
+      setListings((current) => current.map((item) => item.id === listing.id ? listing : item));
+    },
+  }), [account, companies, apartments, listings, activeCompany]);
 
   return <DashboardContext.Provider value={value}>{children}</DashboardContext.Provider>;
 }
