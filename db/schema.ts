@@ -1,4 +1,4 @@
-import { index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { index, integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 // Keep one named export per table so drizzle-kit can generate migrations.
 // This is a small end-to-end example for the application API.
@@ -32,3 +32,17 @@ export const companies = pgTable("companies", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("companies_owner_user_id_idx").on(table.ownerUserId)]);
+
+export const apartments = pgTable("apartments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  companyId: uuid("company_id").notNull().references(() => companies.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  unitIdentifier: text("unit_identifier").notNull(),
+  rooms: integer("rooms").notNull(),
+  location: text("location").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("apartments_company_id_idx").on(table.companyId),
+  unique("apartments_company_unit_identifier_unique").on(table.companyId, table.unitIdentifier),
+]);

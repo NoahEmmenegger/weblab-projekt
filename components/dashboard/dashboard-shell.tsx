@@ -5,6 +5,7 @@ import { DashboardProvider, useDashboard } from "@/components/dashboard/dashboar
 import { LogoutIcon } from "@/components/icons";
 import { logout } from "@/app/actions/auth";
 import type { Company } from "@/app/actions/companies";
+import type { Apartment } from "@/db/queries/apartments";
 import type { ReactNode } from "react";
 
 function DashboardHeader() {
@@ -20,6 +21,6 @@ function DashboardContent({ children }: { children: ReactNode }) {
   return <main className="app-shell"><DashboardHeader />{children}</main>;
 }
 
-export function DashboardShell({ children, account, companies }: { children: ReactNode; account: { id: string; name: string; email: string }; companies: Company[] }) {
-  return <DashboardProvider account={account} initialCompanies={companies}><DashboardContent>{children}</DashboardContent></DashboardProvider>;
+export function DashboardShell({ children, account, companies, apartments }: { children: ReactNode; account: { id: string; name: string; email: string }; companies: Company[]; apartments: Apartment[] }) {
+  return <DashboardProvider account={account} initialCompanies={companies} initialApartments={apartments}><DashboardContent>{children}</DashboardContent></DashboardProvider>;
 }
