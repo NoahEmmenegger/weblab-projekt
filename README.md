@@ -51,8 +51,10 @@ npm run db:migrate
 
 Migrations deliberately do not run automatically when the web container starts.
 
-Add tables as named exports in `db/schema.ts`; import `db` from `db/index.ts`
-only in server-side code. Run `npm run db:studio` to inspect the local database.
+Add tables as named exports in `db/schema.ts`. Keep Drizzle queries in the
+matching file under `db/queries/` (`users`, `sessions`, `companies`, or
+`applications`); server actions, layouts, and API routes call those functions.
+Run `npm run db:studio` to inspect the local database.
 
 ## Example: database to API response
 
@@ -62,7 +64,8 @@ only in server-side code. Run `npm run db:studio` to inspect the local database.
 PostgreSQL table "applications"
   -> db/schema.ts (Drizzle table definition)
   -> db/index.ts (PostgreSQL connection + Drizzle client)
-  -> app/api/applications/route.ts (db.select().from(applications))
+  -> db/queries/applications.ts (database query)
+  -> app/api/applications/route.ts (HTTP response)
   -> JSON response: { "applications": [...] }
 ```
 

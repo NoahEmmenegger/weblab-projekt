@@ -1,7 +1,4 @@
-import { asc } from "drizzle-orm";
-
-import { db } from "@/db";
-import { applications } from "@/db/schema";
+import { listApplications } from "@/db/queries/applications";
 
 // GET /api/applications
 // PostgreSQL -> Drizzle ORM -> JSON HTTP response
@@ -9,10 +6,7 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const applicationRows = await db
-      .select()
-      .from(applications)
-      .orderBy(asc(applications.id));
+    const applicationRows = await listApplications();
 
     return Response.json(
       { applications: applicationRows },
