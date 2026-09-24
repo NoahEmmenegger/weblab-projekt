@@ -2,16 +2,16 @@ import type { AnswerPreference, ApplicationAnswer, ApplicationField, FieldType, 
 import { ensureWeights } from "@/lib/field-weights";
 
 export const preferenceOptions: Record<FieldType, { mode: AnswerPreference["mode"]; label: string }[]> = {
-  text: [{ mode: "exact", label: "Genau diese Antwort" }, { mode: "contains", label: "Enthält diesen Text" }],
-  textarea: [{ mode: "exact", label: "Genau diese Antwort" }, { mode: "contains", label: "Enthält diesen Text" }],
-  email: [{ mode: "exact", label: "Genau diese E-Mail" }, { mode: "email-domain", label: "E-Mail von dieser Domain" }],
-  number: [{ mode: "higher", label: "Je grösser, desto besser" }, { mode: "lower", label: "Je kleiner, desto besser" }, { mode: "number-closest", label: "Möglichst nahe an einer Zahl" }],
-  date: [{ mode: "newer", label: "Je neuer, desto besser" }, { mode: "older", label: "Je länger her, desto besser" }, { mode: "date-closest", label: "Möglichst nahe an einem Datum" }],
+  text: [{ mode: "exact", label: "Genau diese Antwort" }, { mode: "contains", label: "Enthält diesen Text" }, { mode: "not-contains", label: "Enthält diesen Text nicht" }, { mode: "starts-with", label: "Beginnt mit diesem Text" }, { mode: "ends-with", label: "Endet mit diesem Text" }, { mode: "regex", label: "Passt zu einem Regex-Muster" }, { mode: "text-longer", label: "Je länger, desto besser" }, { mode: "text-shorter", label: "Je kürzer, desto besser" }],
+  textarea: [{ mode: "exact", label: "Genau diese Antwort" }, { mode: "contains", label: "Enthält diesen Text" }, { mode: "not-contains", label: "Enthält diesen Text nicht" }, { mode: "starts-with", label: "Beginnt mit diesem Text" }, { mode: "ends-with", label: "Endet mit diesem Text" }, { mode: "regex", label: "Passt zu einem Regex-Muster" }, { mode: "text-longer", label: "Je länger, desto besser" }, { mode: "text-shorter", label: "Je kürzer, desto besser" }],
+  email: [{ mode: "exact", label: "Genau diese E-Mail" }, { mode: "email-domain", label: "E-Mail von dieser Domain" }, { mode: "email-domain-not", label: "E-Mail nicht von dieser Domain" }],
+  number: [{ mode: "higher", label: "Je grösser, desto besser" }, { mode: "lower", label: "Je kleiner, desto besser" }, { mode: "number-closest", label: "Möglichst nahe an einer Zahl" }, { mode: "number-at-least", label: "Mindestens dieser Wert" }, { mode: "number-at-most", label: "Höchstens dieser Wert" }],
+  date: [{ mode: "newer", label: "Je neuer, desto besser" }, { mode: "older", label: "Je älter, desto besser" }, { mode: "date-closest", label: "Möglichst nahe an einem Datum" }, { mode: "date-on-or-after", label: "An oder nach diesem Datum" }, { mode: "date-on-or-before", label: "An oder vor diesem Datum" }],
   checkbox: [{ mode: "checked", label: "Ja ist besser" }, { mode: "unchecked", label: "Nein ist besser" }],
 };
 
 export function needsIdeal(mode: AnswerPreference["mode"]) {
-  return ["exact", "contains", "email-domain", "number-closest", "date-closest"].includes(mode);
+  return ["exact", "contains", "not-contains", "starts-with", "ends-with", "regex", "email-domain", "email-domain-not", "number-closest", "number-at-least", "number-at-most", "date-closest", "date-on-or-after", "date-on-or-before"].includes(mode);
 }
 
 export function validDate(value: string) {
@@ -28,10 +28,15 @@ export function validatePreference(type: FieldType, value: unknown): AnswerPrefe
   if (!needsIdeal(mode)) return { mode } as AnswerPreference;
   const ideal = "ideal" in value && typeof value.ideal === "string" ? value.ideal.trim() : "";
   if (!ideal || ideal.length > 500) throw new Error("Gib eine gültige beste Antwort ein.");
-  if (mode === "number-closest" && (!/^-?\d+(\.\d+)?$/.test(ideal) || !Number.isFinite(Number(ideal)))) throw new Error("Die beste Antwort muss eine Zahl sein.");
-  if (mode === "date-closest" && !validDate(ideal)) throw new Error("Die beste Antwort muss ein gültiges Datum sein.");
-  if (mode === "email-domain" && !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(ideal.replace(/^@/, ""))) throw new Error("Gib eine gültige E-Mail-Domain ein.");
+  if (["number-closest", "number-at-least", "number-at-most"].includes(mode) && (!/^-?\d+(\.\d+)?$/.test(ideal) || !Number.isFinite(Number(ideal)))) throw new Error("Der Zielwert muss eine Zahl sein.");
+  if (["date-closest", "date-on-or-after", "date-on-or-before"].includes(mode) && !validDate(ideal)) throw new Error("Der Zielwert muss ein gültiges Datum sein.");
+  if (["email-domain", "email-domain-not"].includes(mode) && !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(ideal.replace(/^@/, ""))) throw new Error("Gib eine gültige E-Mail-Domain ein.");
   if (mode === "exact" && type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ideal)) throw new Error("Gib eine gültige E-Mail-Adresse ein.");
+  if (mode === "regex") {
+    if (ideal.length > 200) throw new Error("Das Regex-Muster darf höchstens 200 Zeichen lang sein.");
+    try { new RegExp(ideal, "iu"); }
+    catch { throw new Error("Gib ein gültiges Regex-Muster ein (ohne / am Anfang und Ende)."); }
+  }
   return { mode, ideal } as AnswerPreference;
 }
 
@@ -45,15 +50,35 @@ export function answerRank(field: ApplicationField, answer: ApplicationAnswer | 
   const normalized = answer.trim().toLocaleLowerCase("de-CH");
   if (preference.mode === "exact") return normalized === preference.ideal.toLocaleLowerCase("de-CH") ? 0 : 1;
   if (preference.mode === "contains") return normalized.includes(preference.ideal.toLocaleLowerCase("de-CH")) ? 0 : 1;
-  if (preference.mode === "email-domain") return normalized.endsWith(`@${preference.ideal.replace(/^@/, "").toLowerCase()}`) ? 0 : 1;
-  if (preference.mode === "higher" || preference.mode === "lower" || preference.mode === "number-closest") {
+  if (preference.mode === "not-contains") return normalized.includes(preference.ideal.toLocaleLowerCase("de-CH")) ? 1 : 0;
+  if (preference.mode === "starts-with") return normalized.startsWith(preference.ideal.toLocaleLowerCase("de-CH")) ? 0 : 1;
+  if (preference.mode === "ends-with") return normalized.endsWith(preference.ideal.toLocaleLowerCase("de-CH")) ? 0 : 1;
+  if (preference.mode === "regex") {
+    try { return new RegExp(preference.ideal, "iu").test(answer) ? 0 : 1; }
+    catch { return Number.POSITIVE_INFINITY; }
+  }
+  if (preference.mode === "text-longer") return -Array.from(answer.trim()).length;
+  if (preference.mode === "text-shorter") return Array.from(answer.trim()).length;
+  if (preference.mode === "email-domain" || preference.mode === "email-domain-not") {
+    const matches = normalized.endsWith(`@${preference.ideal.replace(/^@/, "").toLowerCase()}`);
+    return preference.mode === "email-domain" ? (matches ? 0 : 1) : (matches ? 1 : 0);
+  }
+  if (preference.mode === "higher" || preference.mode === "lower" || preference.mode === "number-closest" || preference.mode === "number-at-least" || preference.mode === "number-at-most") {
     const number = Number(answer);
     if (!Number.isFinite(number)) return Number.POSITIVE_INFINITY;
-    return preference.mode === "higher" ? -number : preference.mode === "lower" ? number : Math.abs(number - Number(preference.ideal));
+    if (preference.mode === "higher") return -number;
+    if (preference.mode === "lower") return number;
+    if (preference.mode === "number-at-least") return number >= Number(preference.ideal) ? 0 : 1;
+    if (preference.mode === "number-at-most") return number <= Number(preference.ideal) ? 0 : 1;
+    if (preference.mode === "number-closest") return Math.abs(number - Number(preference.ideal));
   }
   if (!validDate(answer)) return Number.POSITIVE_INFINITY;
   const date = Date.parse(`${answer}T00:00:00Z`);
-  return preference.mode === "newer" ? -date : preference.mode === "older" ? date : Math.abs(date - Date.parse(`${preference.ideal}T00:00:00Z`));
+  if (preference.mode === "newer") return -date;
+  if (preference.mode === "older") return date;
+  if (preference.mode === "date-on-or-after") return answer >= preference.ideal ? 0 : 1;
+  if (preference.mode === "date-on-or-before") return answer <= preference.ideal ? 0 : 1;
+  return Math.abs(date - Date.parse(`${preference.ideal}T00:00:00Z`));
 }
 
 export function rankApplications(applications: SubmittedApplication[], fields: ApplicationField[]) {
