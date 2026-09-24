@@ -3,6 +3,7 @@
 import { findPublishedListing, insertApplication, listApplicationsForOwner, setListingPublicationForOwner, upsertListingForOwner } from "@/db/queries/listings";
 import { getCurrentUser } from "@/lib/auth";
 import { uuidPattern, type ApplicationAnswer, type ApplicationField, type ListingDraft } from "@/lib/listing-types";
+import { validatePreference, validDate } from "@/lib/answer-preferences";
 
 const allowedTypes = new Set(["text", "number", "email", "date", "textarea", "checkbox"]);
 
@@ -24,7 +25,7 @@ function validateDraft(value: ListingDraft): ListingDraft {
     const label = field.label.trim();
     if (!label || label.length > 120 || ids.has(field.id)) throw new Error("Feldnamen und Kennungen müssen eindeutig und gültig sein.");
     ids.add(field.id);
-    return { id: field.id, label, type: field.type, required: field.required };
+    return { id: field.id, label, type: field.type, required: field.required, preference: validatePreference(field.type, field.preference) };
   });
   return { title, description, fields };
 }
@@ -71,8 +72,7 @@ export async function submitListingApplication(listingId: string, formData: Form
     if (answer && field.type === "number" && (!Number.isFinite(Number(answer)) || !/^-?\d+(\.\d+)?$/.test(answer))) return { ok: false, error: `„${field.label}“ muss eine Zahl sein.` };
     if (answer && field.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answer)) return { ok: false, error: `„${field.label}“ muss eine E-Mail-Adresse sein.` };
     if (answer && field.type === "date") {
-      const date = new Date(`${answer}T00:00:00Z`);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(answer) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== answer) return { ok: false, error: `„${field.label}“ muss ein Datum sein.` };
+      if (!validDate(answer)) return { ok: false, error: `„${field.label}“ muss ein Datum sein.` };
     }
     answers[field.id] = answer;
   }

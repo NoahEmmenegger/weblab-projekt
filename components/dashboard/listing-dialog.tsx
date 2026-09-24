@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PlusIcon, TrashIcon } from "@/components/icons";
 import type { Apartment } from "@/db/queries/apartments";
 import type { FieldType, ApplicationField, ListingDraft } from "@/lib/listing-types";
+import { needsIdeal, preferenceOptions, validatePreference } from "@/lib/answer-preferences";
 
 
 const fieldTypes: { value: FieldType; label: string }[] = [
@@ -41,9 +42,15 @@ export function ListingDialog({ apartment, draft, onClose, onSave }: {
     setError("");
   }
 
+  function changeType(field: ApplicationField, type: FieldType) {
+    updateField(field.id, { type, preference: undefined });
+  }
+
   async function save() {
     if (!title.trim()) { setError("Gib einen Titel für die Ausschreibung ein."); setTab("edit"); return; }
     if (fields.some((field) => !field.label.trim())) { setError("Jedes Formularfeld braucht eine Bezeichnung."); setTab("edit"); return; }
+    try { fields.forEach((field) => validatePreference(field.type, field.preference)); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : "Ungültige Bewertungsregel."); setTab("edit"); return; }
     setPending(true);
     setError("");
     try {
@@ -74,7 +81,13 @@ export function ListingDialog({ apartment, draft, onClose, onSave }: {
           {fields.map((field, index) => <div className="listing-field-card" key={field.id}>
             <div className="listing-field-top"><span>FELD {index + 1}</span><button type="button" className="row-icon-button danger" onClick={() => setFields((current) => current.filter((item) => item.id !== field.id))} aria-label={`Feld ${index + 1} entfernen`}><TrashIcon /></button></div>
             <div className="listing-field-grid"><div className="listing-field"><label htmlFor={`field-label-${field.id}`}>Bezeichnung</label><input id={`field-label-${field.id}`} value={field.label} onChange={(event) => updateField(field.id, { label: event.target.value })} placeholder="z. B. Monatliches Einkommen" /></div>
-              <div className="listing-field"><label htmlFor={`field-type-${field.id}`}>Antworttyp</label><select id={`field-type-${field.id}`} value={field.type} onChange={(event) => updateField(field.id, { type: event.target.value as FieldType })}>{fieldTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}</select></div></div>
+              <div className="listing-field"><label htmlFor={`field-type-${field.id}`}>Antworttyp</label><select id={`field-type-${field.id}`} value={field.type} onChange={(event) => changeType(field, event.target.value as FieldType)}>{fieldTypes.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}</select></div></div>
+            <div className="preference-editor"><div className="listing-field"><label htmlFor={`field-preference-${field.id}`}>Welche Antwort ist besser? <span>(optional)</span></label><select id={`field-preference-${field.id}`} value={field.preference?.mode ?? ""} onChange={(event) => {
+              const mode = event.target.value;
+              updateField(field.id, { preference: mode ? { mode, ...(needsIdeal(mode as NonNullable<ApplicationField["preference"]>["mode"]) ? { ideal: "" } : {}) } as ApplicationField["preference"] : undefined });
+            }}><option value="">Keine Bewertung</option>{preferenceOptions[field.type].map((option) => <option key={option.mode} value={option.mode}>{option.label}</option>)}</select></div>
+              {field.preference && needsIdeal(field.preference.mode) && <div className="listing-field"><label htmlFor={`field-ideal-${field.id}`}>{field.preference.mode === "email-domain" ? "Bevorzugte Domain" : "Beste Antwort / Zielwert"}</label><input id={`field-ideal-${field.id}`} type={field.preference.mode === "number-closest" ? "number" : field.preference.mode === "date-closest" ? "date" : field.preference.mode === "exact" && field.type === "email" ? "email" : "text"} step={field.preference.mode === "number-closest" ? "any" : undefined} value={"ideal" in field.preference ? field.preference.ideal : ""} onChange={(event) => updateField(field.id, { preference: { ...field.preference, ideal: event.target.value } as ApplicationField["preference"] })} placeholder={field.preference.mode === "email-domain" ? "beispiel.ch" : undefined} /></div>}</div>
+            {field.preference && <p className="preference-hint">Diese Regel ordnet Bewerbungen in der Übersicht. Bewerbende sehen sie nicht.</p>}
             <label className="required-toggle"><input type="checkbox" checked={field.required} onChange={(event) => updateField(field.id, { required: event.target.checked })} /> Pflichtfeld</label>
           </div>)}
           {!fields.length && <p className="listing-no-fields">Noch keine Felder. Füge ein Feld hinzu, um Angaben abzufragen.</p>}
