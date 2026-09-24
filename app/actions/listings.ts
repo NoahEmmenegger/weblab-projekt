@@ -23,7 +23,7 @@ function validateDraft(value: ListingDraft): ListingDraft {
   if (value.fields.some((field) => !field || typeof field !== "object")) throw new Error("Ungültiges Formularfeld.");
   const ids = new Set<string>();
   const weightedFields = ensureWeights(value.fields);
-  if (!weightsAreValid(weightedFields)) throw new Error("Die Wichtigkeit aller Fragen muss zusammen 100 % ergeben.");
+  if (!weightsAreValid(weightedFields)) throw new Error("Die bewerteten Fragen müssen zusammen 100 % ergeben.");
   const fields: ApplicationField[] = weightedFields.map((field) => {
     if (!field || typeof field.id !== "string" || !/^[\w-]{1,80}$/.test(field.id) || typeof field.label !== "string" || !allowedTypes.has(field.type) || typeof field.required !== "boolean") throw new Error("Ungültiges Formularfeld.");
     const label = field.label.trim();

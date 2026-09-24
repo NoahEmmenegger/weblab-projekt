@@ -37,7 +37,7 @@ export function DashboardOverview() {
   const applicationCount = listings.reduce((total, listing) => total + listing.applicationCount, 0);
   const publishedCount = listings.filter((listing) => listing.isPublished).length;
   const rankedApplications = viewingListing ? rankApplications(submittedApplications, viewingListing.fields) : [];
-  const hasPreferences = viewingListing?.fields.some((field) => field.preference && (field.weight ?? 100 / viewingListing.fields.length) > 0) ?? false;
+  const hasPreferences = viewingListing?.fields.some((field) => field.preference) ?? false;
   return <section className="dashboard-content">
     <p className="eyebrow">ÜBERSICHT</p><h1>Guten Morgen, {account.name.split(" ")[0]}.</h1>
     <p className="intro">{activeCompany ? <>Hier siehst du auf einen Blick, was in <strong>{activeCompany.name}</strong> ansteht.</> : "Erstelle deine erste Gesellschaft über das Menü oben links."}</p>

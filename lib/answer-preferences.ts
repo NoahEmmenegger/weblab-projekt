@@ -1,4 +1,5 @@
 import type { AnswerPreference, ApplicationAnswer, ApplicationField, FieldType, SubmittedApplication } from "@/lib/listing-types";
+import { ensureWeights } from "@/lib/field-weights";
 
 export const preferenceOptions: Record<FieldType, { mode: AnswerPreference["mode"]; label: string }[]> = {
   text: [{ mode: "exact", label: "Genau diese Antwort" }, { mode: "contains", label: "Enthält diesen Text" }],
@@ -56,7 +57,7 @@ export function answerRank(field: ApplicationField, answer: ApplicationAnswer | 
 }
 
 export function rankApplications(applications: SubmittedApplication[], fields: ApplicationField[]) {
-  const criteria = fields.filter((field) => field.preference && (field.weight ?? 100 / fields.length) > 0);
+  const criteria = ensureWeights(fields).filter((field) => field.preference && field.weight! > 0);
   if (!criteria.length) return applications.map((application) => ({ application, points: 0 }));
   const ranked = applications.map((application) => ({
     application,
@@ -66,7 +67,7 @@ export function rankApplications(applications: SubmittedApplication[], fields: A
       return total + applications.reduce((score, other) => {
         if (other.id === application.id) return score;
         const theirs = answerRank(field, other.answers[field.id]);
-        return score + (own < theirs ? 1 : own === theirs ? 0.5 : 0) * (field.weight ?? 100 / fields.length);
+        return score + (own < theirs ? 1 : own === theirs ? 0.5 : 0) * field.weight!;
       }, 0);
     }, 0),
   }));
