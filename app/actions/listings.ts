@@ -4,6 +4,7 @@ import { findPublishedListing, insertApplication, listApplicationsForOwner, setL
 import { getCurrentUser } from "@/lib/auth";
 import { uuidPattern, type ApplicationAnswer, type ApplicationField, type ListingDraft } from "@/lib/listing-types";
 import { validatePreference, validDate } from "@/lib/answer-preferences";
+import { ensureWeights, weightsAreValid } from "@/lib/field-weights";
 
 const allowedTypes = new Set(["text", "number", "email", "date", "textarea", "checkbox"]);
 
@@ -19,13 +20,16 @@ function validateDraft(value: ListingDraft): ListingDraft {
   const description = value.description.trim();
   if (!title || title.length > 150 || description.length > 5000) throw new Error("Bitte gib einen Titel mit höchstens 150 Zeichen und eine kurze Beschreibung ein.");
   if (value.fields.length < 1 || value.fields.length > 40) throw new Error("Das Formular braucht 1 bis 40 Felder.");
+  if (value.fields.some((field) => !field || typeof field !== "object")) throw new Error("Ungültiges Formularfeld.");
   const ids = new Set<string>();
-  const fields: ApplicationField[] = value.fields.map((field) => {
+  const weightedFields = ensureWeights(value.fields);
+  if (!weightsAreValid(weightedFields)) throw new Error("Die Wichtigkeit aller Fragen muss zusammen 100 % ergeben.");
+  const fields: ApplicationField[] = weightedFields.map((field) => {
     if (!field || typeof field.id !== "string" || !/^[\w-]{1,80}$/.test(field.id) || typeof field.label !== "string" || !allowedTypes.has(field.type) || typeof field.required !== "boolean") throw new Error("Ungültiges Formularfeld.");
     const label = field.label.trim();
     if (!label || label.length > 120 || ids.has(field.id)) throw new Error("Feldnamen und Kennungen müssen eindeutig und gültig sein.");
     ids.add(field.id);
-    return { id: field.id, label, type: field.type, required: field.required, preference: validatePreference(field.type, field.preference) };
+    return { id: field.id, label, type: field.type, required: field.required, preference: validatePreference(field.type, field.preference), weight: field.weight };
   });
   return { title, description, fields };
 }

@@ -11,7 +11,7 @@ export type AnswerPreference =
   | { mode: "date-closest"; ideal: string }
   | { mode: "checked" }
   | { mode: "unchecked" };
-export type ApplicationField = { id: string; label: string; type: FieldType; required: boolean; preference?: AnswerPreference };
+export type ApplicationField = { id: string; label: string; type: FieldType; required: boolean; preference?: AnswerPreference; weight?: number };
 export type ListingDraft = { title: string; description: string; fields: ApplicationField[] };
 export type Listing = ListingDraft & { id: string; apartmentId: string; isPublished: boolean; applicationCount: number };
 export type ApplicationAnswer = string | boolean;
