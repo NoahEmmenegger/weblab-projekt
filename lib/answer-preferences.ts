@@ -83,18 +83,22 @@ export function answerRank(field: ApplicationField, answer: ApplicationAnswer | 
 
 export function rankApplications(applications: SubmittedApplication[], fields: ApplicationField[]) {
   const criteria = ensureWeights(fields).filter((field) => field.preference && field.weight! > 0);
-  if (!criteria.length) return applications.map((application) => ({ application, points: 0 }));
+  if (!criteria.length) return applications.map((application) => ({ application, points: 0, contributions: {} as Record<string, number> }));
   const ranked = applications.map((application) => ({
     application,
-    // Each field awards its percentage for a win and half for a tie.
-    points: criteria.reduce((total, field) => {
+    // Each field awards its weight for a win and half for a tie against each other application.
+    contributions: Object.fromEntries(criteria.map((field) => {
       const own = answerRank(field, application.answers[field.id]);
-      return total + applications.reduce((score, other) => {
+      const points = applications.reduce((score, other) => {
         if (other.id === application.id) return score;
         const theirs = answerRank(field, other.answers[field.id]);
         return score + (own < theirs ? 1 : own === theirs ? 0.5 : 0) * field.weight!;
       }, 0);
-    }, 0),
+      return [field.id, points];
+    })) as Record<string, number>,
   }));
-  return ranked.sort((a, b) => b.points - a.points || b.application.createdAt.localeCompare(a.application.createdAt));
+  return ranked.map((item) => ({
+    ...item,
+    points: Object.values(item.contributions).reduce((total, points) => total + points, 0),
+  })).sort((a, b) => b.points - a.points || b.application.createdAt.localeCompare(a.application.createdAt));
 }
