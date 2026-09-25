@@ -13,7 +13,7 @@ Dieses Kapitel fasst die grundlegenden Entscheidungen zusammen, mit denen die fa
   [Datenbank], [PostgreSQL], [Relationale und transaktionale Speicherung der miteinander verknüpften Ausschreibungen, Kriterien und Bewerbungen.],
   [Datenzugriff], [Drizzle ORM], [Typsicherer, SQL-naher Datenzugriff; Tabellen und Migrationen bleiben direkt bei den TypeScript-Modellen.],
   [Authentisierung], [Einfache Benutzeranmeldung für Gesellschaften], [Schützt den Verwaltungsbereich; öffentlich geteilte Formulare können zusätzlich einen Zugangsschlüssel verlangen.],
-  [Tests], [Unit-, Integrations- und E2E-Tests; Werkzeuge noch offen], [Die deterministische Bewertungslogik, Datenintegrität und zentralen Benutzerabläufe werden automatisiert abgesichert.],
+  [Tests], [Node.js-Test-Runner für Unit- und Datenbank-Integrationstests], [Gewichtung, Bewertungsregeln und Ranking werden automatisch geprüft; ein separater Integrationstest prüft Persistenz und Auswertung in PostgreSQL. Browser-E2E-Tests sind noch offen.],
   [Betrieb], [Docker Compose und Dokploy als Deployment-Ziel], [Compose startet Web-Anwendung, Migration und PostgreSQL in definierter Reihenfolge. Ein Volume persistiert die Datenbankdaten; Dokploy ist für das automatische Deployment vorgesehen.],
   [Versionsverwaltung], [Git und GitHub], [Nachvollziehbare Entwicklung und gemeinsame Ablage aller Artefakte.],
   [CI/CD], [GitHub Actions und Dokploy (geplant)], [Typecheck, Lint und Build sollen vor einem automatischen Deploy-Trigger erfolgreich durchlaufen.],

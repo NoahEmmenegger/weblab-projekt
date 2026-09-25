@@ -25,6 +25,4 @@
 
 == Evaluationsergebnisse
 
-// Am Projektende Ist-Werte und Links/Verweise auf Test- und Lighthouse-Berichte ergänzen.
-
-[Ergebnisse, Abweichungen und getroffene Verbesserungsmassnahmen]
+Am 25.09.2026 bestanden vier automatisierte Unit-Tests für Gewichtung, Validierung und Ranking (`npm test`). Ein PostgreSQL-Integrationstest für persistierte Ausschreibungen, Bewerbungen und ihre Auswertung bestand ebenfalls (`npm run test:integration`). Der Integrationstest lief nach Anwendung der Migrationen gegen eine separate lokale Testdatenbank. Die Testfälle liegen in `tests/`.

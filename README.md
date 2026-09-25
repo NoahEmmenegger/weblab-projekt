@@ -56,6 +56,30 @@ matching file under `db/queries/` (`users`, `sessions`, `companies`, or
 `applications`); server actions, layouts, and API routes call those functions.
 Run `npm run db:studio` to inspect the local database.
 
+## Tests
+
+`npm test` runs the automated unit tests for field weights, answer validation,
+and application ranking. `npm run test:integration` runs a PostgreSQL test that
+persists a company, apartment, listing, and applications, reads the answers back,
+and checks their ranking. The integration test removes its records afterward and
+requires a separate database whose name ends in `_test`.
+
+For a local PostgreSQL started with `npm run devDB`, create and migrate the test
+database once. In PowerShell, adjust the user, password, and port to match `.env`:
+
+```powershell
+docker compose exec -T db createdb -U wohnungsvergabe wohnungsvergabe_test
+$env:TEST_DATABASE_URL = "postgresql://wohnungsvergabe:<password>@localhost:5432/wohnungsvergabe_test"
+$env:DATABASE_URL = $env:TEST_DATABASE_URL
+npm run db:migrate
+Remove-Item Env:DATABASE_URL
+npm run test:integration
+```
+
+The integration command fails if `TEST_DATABASE_URL` is missing or does not name
+a `_test` database. Run `npm run typecheck`, `npm run lint`, and `npm run build`
+for the remaining static and production-build checks.
+
 ## Example: database to API response
 
 `GET /api/applications` is a minimal end-to-end example:

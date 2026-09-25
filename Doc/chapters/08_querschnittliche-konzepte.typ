@@ -27,6 +27,7 @@ Zugangsdaten liegen in `.env` und sind von Git ausgeschlossen. Docker Compose ve
   table.header([*Teststufe*], [*Zweck*], [*Beispiele/Werkzeuge*]),
   [Statisch], [Typen und Stilregeln prüfen], [`npm run typecheck` und `npm run lint`],
   [Build], [Produktionsbundle und Route-Typen prüfen], [`npm run build`],
-  [Integration], [Datenbank und Schnittstellen prüfen], [Manuelle Prüfung von `GET /api/applications`; automatisierte Tests noch offen],
-  [E2E/Qualität], [Kritische Journeys, Performance und Accessibility prüfen], [Noch offen; vor fachlicher Fertigstellung ergänzen],
+  [Unit], [Gewichtung, Eingabeprüfung und Ranking prüfen], [`npm test`: automatisierte Tests mit dem Node.js-Test-Runner],
+  [Integration], [Persistenz und Auswertung mit PostgreSQL prüfen], [`npm run test:integration` mit separater `TEST_DATABASE_URL`; Ausführung benötigt eine migrierte Testdatenbank],
+  [E2E/Qualität], [Kritische Browser-Journeys, Performance und Accessibility prüfen], [Noch offen; vor fachlicher Fertigstellung ergänzen],
 )
