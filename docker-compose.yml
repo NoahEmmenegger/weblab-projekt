@@ -10,9 +10,20 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-wohnungsvergabe}:${POSTGRES_PASSWORD:-wohnungsvergabe_dev_password}@db:5432/${POSTGRES_DB:-wohnungsvergabe}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-wohnungsvergabe}:${POSTGRES_PASSWORD:-wohnungsvergabe_dev_password}@db:5432/${POSTGRES_DB:-wohnungsvergabe}
+    depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
 
   db:
     image: postgres:17-alpine
