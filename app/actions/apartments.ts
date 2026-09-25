@@ -1,6 +1,7 @@
 "use server";
 
 import { insertApartmentForOwner, updateApartmentForOwner, deleteApartmentForOwner, type Apartment } from "@/db/queries/apartments";
+import { insertDemoApartmentForOwner } from "@/db/queries/demo-apartment";
 import { getCurrentUser } from "@/lib/auth";
 
 async function requireUser() {
@@ -51,4 +52,11 @@ export async function updateApartment(apartmentId: string, name: string, unitIde
 export async function deleteApartment(apartmentId: string): Promise<void> {
   const user = await requireUser();
   if (!await deleteApartmentForOwner(user.id, apartmentId)) throw new Error("Wohnung nicht gefunden.");
+}
+
+export async function importDemoApartment(companyId: string) {
+  const user = await requireUser();
+  const result = await insertDemoApartmentForOwner(user.id, companyId);
+  if (!result) throw new Error("Gesellschaft nicht gefunden.");
+  return result;
 }

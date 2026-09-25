@@ -49,6 +49,8 @@ button { cursor: pointer; }
 .field-weight { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; }.field-weight label { font-size: 12px; font-weight: 700; }.field-weight > div { display: flex; align-items: center; gap: 6px; }.listing-modal .field-weight input { width: 78px; text-align: right; }.field-weight span { color: var(--muted); font-size: 13px; }
 @media (max-width: 650px) { .weight-summary { align-items: flex-start; flex-direction: column; }.weight-controls { flex-wrap: wrap; }.field-weight { align-items: flex-start; flex-direction: column; } }
 .field-weight .field-weight-controls { display: flex; align-items: center; gap: 8px; width: min(100%, 280px); }
+.section-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 650px) { .section-heading { align-items: flex-start; flex-direction: column; }.section-actions { width: 100%; justify-content: flex-start; } }
 .listing-modal .field-weight input[type="range"] { flex: 1; width: auto; min-width: 80px; height: 24px; min-height: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; accent-color: var(--green); cursor: pointer; }
 .listing-modal .field-weight input[type="number"] { flex: none; width: 70px; }
 .listing-field-top .row-icon-button:disabled { opacity: .35; cursor: not-allowed; }

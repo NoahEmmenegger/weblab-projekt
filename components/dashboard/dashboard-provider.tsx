@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { createCompany as createCompanyAction, updateCompany as updateCompanyAction, type Company } from "@/app/actions/companies";
-import { createApartment as createApartmentAction, updateApartment as updateApartmentAction, deleteApartment as deleteApartmentAction } from "@/app/actions/apartments";
+import { createApartment as createApartmentAction, updateApartment as updateApartmentAction, deleteApartment as deleteApartmentAction, importDemoApartment as importDemoApartmentAction } from "@/app/actions/apartments";
 import { publishListing as publishListingAction, saveListing as saveListingAction } from "@/app/actions/listings";
 import type { Apartment } from "@/db/queries/apartments";
 import type { Listing, ListingDraft } from "@/lib/listing-types";
@@ -17,6 +17,7 @@ type DashboardContextValue = {
   updateCompany: (companyId: string, name: string, location: string) => Promise<void>;
   apartments: Apartment[];
   createApartment: (name: string, unitIdentifier: string, rooms: number, location: string) => Promise<void>;
+  importDemoApartment: () => Promise<void>;
   updateApartment: (apartmentId: string, name: string, unitIdentifier: string, rooms: number, location: string) => Promise<void>;
   deleteApartment: (apartmentId: string) => Promise<void>;
   listings: Listing[];
@@ -52,6 +53,12 @@ export function DashboardProvider({ children, account, initialCompanies, initial
       if (!activeCompany) throw new Error("Erstelle zuerst eine Gesellschaft.");
       const apartment = await createApartmentAction(activeCompany.id, name, unitIdentifier, rooms, location);
       setApartments((current) => [...current, apartment]);
+    },
+    async importDemoApartment() {
+      if (!activeCompany) throw new Error("Erstelle zuerst eine Gesellschaft.");
+      const { apartment, listing } = await importDemoApartmentAction(activeCompany.id);
+      setApartments((current) => [...current, apartment]);
+      setListings((current) => [...current, listing]);
     },
     async updateApartment(apartmentId, name, unitIdentifier, rooms, location) {
       const apartment = await updateApartmentAction(apartmentId, name, unitIdentifier, rooms, location);

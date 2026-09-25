@@ -55,7 +55,7 @@ function ApplicationCard({ item, rank, fields, applicationCount, hasPreferences 
 }
 
 export function DashboardOverview() {
-  const { account, activeCompany, apartments, listings, createApartment, updateApartment, deleteApartment, saveListing, publishListing } = useDashboard();
+  const { account, activeCompany, apartments, listings, createApartment, importDemoApartment, updateApartment, deleteApartment, saveListing, publishListing } = useDashboard();
   const [editingApartment, setEditingApartment] = useState<Apartment | null | undefined>(undefined);
   const [listingApartment, setListingApartment] = useState<Apartment | null>(null);
   const [viewingListing, setViewingListing] = useState<Listing | null>(null);
@@ -63,7 +63,14 @@ export function DashboardOverview() {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [applicationSort, setApplicationSort] = useState<ApplicationSort>("match-best");
   const [busyListingId, setBusyListingId] = useState<string | null>(null);
+  const [importingDemo, setImportingDemo] = useState(false);
   const [error, setError] = useState("");
+  async function importExample() {
+    setImportingDemo(true); setError("");
+    try { await importDemoApartment(); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : "Beispielwohnung konnte nicht importiert werden."); }
+    finally { setImportingDemo(false); }
+  }
   async function removeApartment(apartment: Apartment) {
     if (!window.confirm(`„${apartment.name}“ wirklich löschen?`)) return;
     setError("");
@@ -98,7 +105,7 @@ export function DashboardOverview() {
       <article><span>AKTIVE AUSSCHREIBUNGEN</span><strong>{publishedCount}</strong><p>Öffentlich zugängliche Formulare</p></article>
     </div>
     {activeCompany ? <section className="apartments-section">
-      <div className="section-heading"><div><p className="eyebrow">BESTAND</p><h2>Wohnungen</h2><p>Alle einzeln erfassbaren Wohnungen von {activeCompany.name}.</p></div><button className="button primary add-apartment" onClick={() => setEditingApartment(null)}><PlusIcon /> Wohnung erfassen</button></div>
+      <div className="section-heading"><div><p className="eyebrow">BESTAND</p><h2>Wohnungen</h2><p>Alle einzeln erfassbaren Wohnungen von {activeCompany.name}.</p></div><div className="section-actions"><button className="button secondary" onClick={importExample} disabled={importingDemo}>{importingDemo ? "Importiere …" : "Beispielwohnung importieren"}</button><button className="button primary add-apartment" onClick={() => setEditingApartment(null)}><PlusIcon /> Wohnung erfassen</button></div></div>
       {error && <p className="form-error" role="alert">{error}</p>}
       {apartments.length ? <div className="apartment-list">{apartments.map((apartment) => {
         const listing = listings.find((item) => item.apartmentId === apartment.id);
