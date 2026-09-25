@@ -28,14 +28,27 @@
 
 == Ebene 2: Next.js-Anwendung
 
-Der App Router bildet öffentliche Bewerbungsseiten und den geschützten Verwaltungsbereich auf Routen ab. React-Komponenten stellen die Oberfläche dar. Navigation, Footer, Layouts und datenlesende Seiten werden als Server Components serverseitig gerendert. Client Components werden nur für interaktive Teilbäume verwendet, die Browserzustand oder Ereignisbehandlung benötigen, etwa dynamische Formularfelder, Filter und Sortierung.
+Die Anwendung ist in Schichten mit gerichteten Abhängigkeiten gegliedert. Der App Router und die Komponenten bilden die Darstellung. Server Actions und Route Handlers nehmen Eingaben entgegen und koordinieren Anwendungsfälle. Datenbankfreie Funktionen in `lib/` enthalten Typen, Gewichtungs- und Bewertungsregeln. Die Abfragen in `db/queries/` kapseln Drizzle und PostgreSQL. Nur serverseitige Einstiegspunkte importieren den Datenzugriff; die Oberfläche erhält Daten als Props oder als Rückgabe einer Server Action.
 
-Schreibende Aktionen werden ausschliesslich serverseitig autorisiert und validiert. Route Handlers werden für explizite HTTP-Endpunkte wie Exporte eingesetzt; eng an eine Seite gebundene Mutationen können als Server Actions umgesetzt werden. Beide Varianten rufen dieselben Fachmodule auf.
+#figure(
+  table(
+    columns: (27%, 73%),
+    table.header([*Ausführungsort*], [*Schicht und Datenfluss*]),
+    [Browser], [`components/` mit `"use client"`: Formulare, Dialoge, Dashboard-Zustand und Ereignisse],
+    [Server], [`app/` mit Server Components: Routing, initiale Daten und Zugriffsschutz],
+    [Server], [`app/actions/` und `app/api/`: Autorisierung, Eingabeprüfung und Anwendungsfälle],
+    [Beide Seiten], [`lib/`: reine Typen, Gewichtungs- und Bewertungsfunktionen ohne Datenbankzugriff],
+    [Nur Server], [`db/queries/` → `db/index.ts` → PostgreSQL: Abfragen und Persistenz],
+  ),
+  caption: [Schichten und Ausführungsorte der Next.js-Anwendung],
+)
 
-Die Fachmodule kennen weder React-Komponenten noch HTTP-Details. Sie enthalten die Anwendungsregeln und verwenden den gekapselten Datenzugriff. Dadurch bleibt der Monolith intern modular und die Bewertungslogik kann unabhängig von der Darstellung getestet werden.
+`app/dashboard/layout.tsx` prüft die Sitzung und lädt Gesellschaften, Wohnungen und Ausschreibungen auf dem Server. Die Daten gehen an `DashboardShell` und `DashboardProvider`, die als Client Components Auswahl, Dialoge und lokalen Zustand verwalten. Die öffentliche Route `app/bewerben/[listingId]/page.tsx` lädt eine veröffentlichte Ausschreibung serverseitig; `ApplicationForm` verarbeitet die Eingabe im Browser. Das Formular ruft `submitListingApplication` als Server Action auf, wo die Eingaben erneut geprüft und gespeichert werden. Der CSV-Export ist ein separater Route Handler unter `app/api/listings/[listingId]/applications/export/route.ts`.
+
+Die Funktionen in `lib/answer-preferences.ts` und `lib/field-weights.ts` sind bewusst unabhängig von React und PostgreSQL. Sie werden sowohl für die Vorschau und Rangliste im Dashboard als auch bei serverseitiger Validierung und beim Export genutzt. Clientseitige Berechnungen dienen der unmittelbaren Anzeige; Berechtigungen und verbindliche Schreiboperationen bleiben auf dem Server. Damit ist die Schichtung eine Trennung der Verantwortlichkeiten innerhalb eines Monolithen, keine vollständig isolierte Domain-Schicht.
 
 == Ebene 2: Persistenz
 
-Das ORM bildet das relationale PostgreSQL-Schema auf TypeScript-Typen ab und verwaltet Migrationen. Zusammengehörige Änderungen, etwa das Speichern einer Bewerbung mit ihren Antworten und Bewertungsergebnissen, werden in einer Transaktion ausgeführt. Nur serverseitiger Code erhält Zugriff auf die Datenbankverbindung.
+Das ORM bildet das relationale PostgreSQL-Schema auf TypeScript-Typen ab und verwaltet versionierte Migrationen. Nur serverseitiger Code erhält Zugriff auf die Datenbankverbindung. Bewerbungsantworten und die zum Einreichungszeitpunkt verwendeten Formularfelder werden in `listing_applications` gespeichert; die Rangfolge wird aus diesen Daten berechnet.
 
-Der aktuelle Schema-Ausschnitt enthält die Tabelle `applications` mit Identifikator, Bewerbername, Status und Erstellzeitpunkt. `db/schema.ts` ist die verbindliche Drizzle-Definition; die erzeugte SQL-Migration liegt versioniert im Verzeichnis `drizzle/`. Der Pool und Drizzle-Client befinden sich in `db/index.ts` und werden nicht in Client Components importiert.
+`db/schema.ts` ist die verbindliche Drizzle-Definition für Benutzer, Sitzungen, Gesellschaften, Wohnungen, Ausschreibungen und Bewerbungen. SQL-Migrationen liegen versioniert in `drizzle/`. Der Pool und der Drizzle-Client befinden sich in `db/index.ts` und werden nicht in Client Components importiert.

@@ -14,8 +14,9 @@ Dieses Kapitel fasst die grundlegenden Entscheidungen zusammen, mit denen die fa
   [Datenzugriff], [Drizzle ORM], [Typsicherer, SQL-naher Datenzugriff; Tabellen und Migrationen bleiben direkt bei den TypeScript-Modellen.],
   [Authentisierung], [Einfache Benutzeranmeldung für Gesellschaften], [Schützt den Verwaltungsbereich; öffentlich geteilte Formulare können zusätzlich einen Zugangsschlüssel verlangen.],
   [Tests], [Unit-, Integrations- und E2E-Tests; Werkzeuge noch offen], [Die deterministische Bewertungslogik, Datenintegrität und zentralen Benutzerabläufe werden automatisiert abgesichert.],
-  [Betrieb], [Docker Compose], [Startet Next.js und PostgreSQL als getrennte, intern vernetzte Services mit einem Befehl. Ein Volume persistiert die Datenbankdaten.],
+  [Betrieb], [Docker Compose und Dokploy als Deployment-Ziel], [Compose startet Web-Anwendung, Migration und PostgreSQL in definierter Reihenfolge. Ein Volume persistiert die Datenbankdaten; Dokploy ist für das automatische Deployment vorgesehen.],
   [Versionsverwaltung], [Git und GitHub], [Nachvollziehbare Entwicklung und gemeinsame Ablage aller Artefakte.],
+  [CI/CD], [GitHub Actions und Dokploy (geplant)], [Typecheck, Lint und Build sollen vor einem automatischen Deploy-Trigger erfolgreich durchlaufen.],
 )
 
 == Architekturansatz
@@ -26,9 +27,9 @@ Next.js Server Components sind der Standard für Layouts und nicht interaktive D
 
 Die Bewertung einer Bewerbung erfolgt regelbasiert und deterministisch. Antworten werden mit den vor Beginn einer Ausschreibung festgelegten Kriterien verglichen und anhand der gespeicherten Gewichtungen zu einer Gesamtbewertung zusammengeführt. Kriterien und Gewichtungen werden mit dem Start der Ausschreibung gesperrt. Neben dem Gesamtwert speichert beziehungsweise liefert die Anwendung die Beiträge der einzelnen Kriterien, damit das Ranking jederzeit erklärt und mit Berechnungsbeispielen getestet werden kann.
 
-PostgreSQL stellt die konsistente Persistenz der fachlichen Daten sicher. Schreiboperationen werden serverseitig validiert und für zusammengehörige Änderungen transaktional ausgeführt. Docker Compose beschreibt die beiden Laufzeitservices `app` und `db`, ihr internes Netzwerk, die Datenbankkonfiguration und ein persistentes Volume. Responsive Komponenten, automatisierte Tests der risikoreichen Abläufe und regelmässige Lighthouse-Messungen unterstützen die Qualitätsziele Benutzbarkeit, Zuverlässigkeit und Änderbarkeit.
+PostgreSQL stellt die konsistente Persistenz der fachlichen Daten sicher. Schreiboperationen werden serverseitig validiert. Docker Compose beschreibt die Laufzeitservices `web`, `migrate` und `db`, ihr internes Netzwerk, die Datenbankkonfiguration und ein persistentes Volume. Der geplante CI/CD-Prozess prüft Änderungen automatisiert und stösst anschliessend ein Deployment auf Dokploy an.
 
-Im aktuellen Stand ist der technische Datenfluss mit der Tabelle `applications` umgesetzt: Eine Route Handler-Abfrage liest Daten über Drizzle aus PostgreSQL und liefert sie als JSON unter `GET /api/applications`. Dies validiert Verbindung, Migration, ORM und API-Schnittstelle als durchgängigen Kern.
+Im aktuellen Stand sind Anmeldung, Gesellschaften, Wohnungen, Ausschreibungen, öffentliche Bewerbungsformulare und CSV-Export umgesetzt. Server Components laden geschützte beziehungsweise öffentliche Daten; Server Actions prüfen und speichern Änderungen über Drizzle in PostgreSQL. `GET /api/applications` bleibt als einfacher technischer Leseendpunkt vorhanden.
 
 == Entwicklungsvorgehen
 

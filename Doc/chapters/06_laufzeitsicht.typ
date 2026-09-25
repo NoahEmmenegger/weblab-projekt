@@ -5,21 +5,21 @@
 1. Eine Bewerberin oder ein Bewerber öffnet die durch den Next.js App Router bereitgestellte Formularroute. Navigation, Footer und Formularrahmen werden serverseitig gerendert.
 2. Interaktive Formularteile werden als Client Components aktiviert. Sie prüfen unmittelbar erkennbare Eingabefehler und senden die Bewerbung an einen serverseitigen Endpunkt der Next.js-Anwendung.
 3. Der Endpunkt prüft Zugangsschlüssel, Ausschreibungsstatus und Eingaben erneut auf dem Server und ruft das Fachmodul auf.
-4. Das Fachmodul speichert Bewerbung und Antworten über das ORM in einer PostgreSQL-Transaktion und berechnet die deterministische Bewertung.
-5. Bei Erfolg liefert Next.js eine Bestätigung. Bei einem erwarteten Fehler bleiben die Eingaben erhalten und die Oberfläche zeigt eine verständliche Meldung; bei einem Datenbankfehler wird die Transaktion zurückgerollt.
+4. Die Server Action speichert die Antworten und eine Kopie der verwendeten Formularfelder über Drizzle in PostgreSQL. Die Rangfolge wird beim Anzeigen der Bewerbungen aus den gespeicherten Daten berechnet.
+5. Bei Erfolg zeigt die Client Component eine Bestätigung. Bei einem erwarteten Fehler bleiben die Eingaben erhalten und die Oberfläche zeigt eine verständliche Meldung.
 
 == Bewertete Bewerbungen laden
 
 1. Eine angemeldete Mitarbeiterin oder ein angemeldeter Mitarbeiter ruft im Verwaltungsbereich eine Ausschreibung auf.
-2. Der App Router prüft die Sitzung und Berechtigung auf dem Server. Das Fachmodul liest Bewerbungen, Gesamtwerte und Einzelbeiträge über das ORM aus PostgreSQL.
-3. Next.js rendert Navigation, Footer und die initiale sortierte Ansicht serverseitig.
-4. Danach aktualisieren kleine Client Components Filter und Sortierung unmittelbar im Browser, sofern dafür keine neue Serverabfrage nötig ist.
+2. Das Dashboard-Layout prüft die Sitzung auf dem Server und lädt die eigenen Gesellschaften, Wohnungen und Ausschreibungen.
+3. Für eine ausgewählte Ausschreibung ruft die Client Component eine Server Action auf. Diese prüft die Berechtigung und lädt die Bewerbungen aus PostgreSQL.
+4. Die datenbankfreie Bewertungsfunktion berechnet im Browser die Rangfolge für die Anzeige. Der CSV-Export berechnet dieselbe Rangfolge separat auf dem Server.
 
 == Datenbank beim gemeinsamen Start noch nicht bereit
 
-1. `docker compose up --build` startet die Services `db` und `app`.
+1. Docker Compose startet die Services `db`, `migrate` und `web`.
 2. PostgreSQL initialisiert das Datenverzeichnis und meldet seinen Zustand über einen Healthcheck.
-3. Die Next.js-Anwendung startet nach erfolgreichem Healthcheck und verbindet sich über den Servicenamen `db`. Schlägt dies fehl, beendet sie sich mit einem sichtbaren Fehler, statt Anfragen in einem unvollständigen Zustand zu verarbeiten.
+3. Nach erfolgreichem Healthcheck führt `migrate` die versionierten SQL-Migrationen aus. Erst nach dessen erfolgreichem Abschluss startet `web`. Schlägt ein Schritt fehl, startet der Web-Service nicht.
 
 == Aktueller API-Datenfluss
 
