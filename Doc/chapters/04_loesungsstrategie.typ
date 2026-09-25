@@ -12,25 +12,24 @@ Dieses Kapitel fasst die grundlegenden Entscheidungen zusammen, mit denen die fa
   [Backend], [Next.js Route Handlers und/oder Server Actions auf Node.js], [Serverseitige Validierung, Fachlogik und Datenzugriff bleiben innerhalb des Monolithen gebündelt; ein separater Express-Service entfällt.],
   [Datenbank], [PostgreSQL], [Relationale und transaktionale Speicherung der miteinander verknüpften Ausschreibungen, Kriterien und Bewerbungen.],
   [Datenzugriff], [Drizzle ORM], [Typsicherer, SQL-naher Datenzugriff; Tabellen und Migrationen bleiben direkt bei den TypeScript-Modellen.],
-  [Authentisierung], [Einfache Benutzeranmeldung für Gesellschaften], [Schützt den Verwaltungsbereich; öffentlich geteilte Formulare können zusätzlich einen Zugangsschlüssel verlangen.],
-  [Tests], [Node.js-Test-Runner für Unit- und Datenbank-Integrationstests], [Gewichtung, Bewertungsregeln und Ranking werden automatisch geprüft; ein separater Integrationstest prüft Persistenz und Auswertung in PostgreSQL. Browser-E2E-Tests sind noch offen.],
-  [Betrieb], [Docker Compose und Dokploy als Deployment-Ziel], [Compose startet Web-Anwendung, Migration und PostgreSQL in definierter Reihenfolge. Ein Volume persistiert die Datenbankdaten; Dokploy ist für das automatische Deployment vorgesehen.],
+  [Authentisierung], [Benutzeranmeldung für Gesellschaften], [Schützt den Verwaltungsbereich und die Bewerbungsdaten.],
+  [Tests], [Node.js-Test-Runner für Unit- und Datenbank-Integrationstests], [Gewichtung, Bewertungsregeln, Ranking, Persistenz und Berechtigungen werden automatisch geprüft.],
+  [Betrieb], [Docker Compose], [Compose startet Web-Anwendung, Migration und PostgreSQL in definierter Reihenfolge. Ein Volume persistiert die Datenbankdaten.],
   [Versionsverwaltung], [Git und GitHub], [Nachvollziehbare Entwicklung und gemeinsame Ablage aller Artefakte.],
-  [CI/CD], [GitHub Actions und Dokploy (geplant)], [Typecheck, Lint und Build sollen vor einem automatischen Deploy-Trigger erfolgreich durchlaufen.],
 )
 
 == Architekturansatz
 
-Die Anwendung wird als modular strukturierter Monolith umgesetzt. Der Next.js App Router, React-Komponenten, serverseitige Endpunkte und Fachlogik befinden sich in derselben Next.js-Anwendung und werden gemeinsam ausgeliefert. Ein eigenständiges Express-Backend und die damit verbundene zweite Projekt-, Schnittstellen- und Deployment-Konfiguration entfallen. Innerhalb des Monolithen werden die fachlichen Verantwortlichkeiten - insbesondere Ausschreibungen, Formulare, Kriterien und Bewertung, Bewerbungen, Benutzerverwaltung und Export - klar voneinander getrennt. Dadurch bleibt der Betrieb einfach, ohne auf eine nachvollziehbare und erweiterbare Struktur zu verzichten.
+Die Anwendung ist als modular strukturierter Monolith umgesetzt. Der Next.js App Router, React-Komponenten, serverseitige Endpunkte und Fachlogik befinden sich in derselben Next.js-Anwendung und werden gemeinsam ausgeliefert. Ein eigenständiges Express-Backend entfällt. Innerhalb des Monolithen sind Ausschreibungen, Formulare, Bewertung, Bewerbungen, Benutzerverwaltung und Export in eigenen Modulen gegliedert.
 
 Next.js Server Components sind der Standard für Layouts und nicht interaktive Darstellung. Navigation, Footer und datenlesende Seiten werden serverseitig gerendert. Client Components bilden nur die interaktiven Teilbäume, die Browserzustand, Ereignisbehandlung oder unmittelbare Aktualisierungen benötigen, beispielsweise dynamische Formularfelder, Filter und Sortierungen. Damit wird nur so viel JavaScript wie nötig an den Browser ausgeliefert, ohne auf eine reaktive Bedienung zu verzichten.
 
-Die Bewertung einer Bewerbung erfolgt regelbasiert und deterministisch. Antworten werden mit den vor Beginn einer Ausschreibung festgelegten Kriterien verglichen und anhand der gespeicherten Gewichtungen zu einer Gesamtbewertung zusammengeführt. Kriterien und Gewichtungen werden mit dem Start der Ausschreibung gesperrt. Neben dem Gesamtwert speichert beziehungsweise liefert die Anwendung die Beiträge der einzelnen Kriterien, damit das Ranking jederzeit erklärt und mit Berechnungsbeispielen getestet werden kann.
+Die Bewertung erfolgt regelbasiert. Für jedes gewichtete Feld werden die Antworten der Bewerbungen paarweise verglichen: Eine bessere Antwort erhält die Gewichtung als Punkte, ein Gleichstand die Hälfte. Die Summe der Beiträge ergibt den Gesamtwert. Die Rangfolge hängt damit auch von den übrigen Bewerbungen ab. Das Dashboard und der CSV-Export weisen die Beiträge der einzelnen Kriterien aus.
 
-PostgreSQL stellt die konsistente Persistenz der fachlichen Daten sicher. Schreiboperationen werden serverseitig validiert. Docker Compose beschreibt die Laufzeitservices `web`, `migrate` und `db`, ihr internes Netzwerk, die Datenbankkonfiguration und ein persistentes Volume. Der geplante CI/CD-Prozess prüft Änderungen automatisiert und stösst anschliessend ein Deployment auf Dokploy an.
+PostgreSQL speichert die fachlichen Daten. Schreiboperationen werden serverseitig validiert. Docker Compose beschreibt die Laufzeitservices `web`, `migrate` und `db`, ihr internes Netzwerk, die Datenbankkonfiguration und ein persistentes Volume.
 
 Im aktuellen Stand sind Anmeldung, Gesellschaften, Wohnungen, Ausschreibungen, öffentliche Bewerbungsformulare und CSV-Export umgesetzt. Server Components laden geschützte beziehungsweise öffentliche Daten; Server Actions prüfen und speichern Änderungen über Drizzle in PostgreSQL. `GET /api/applications` bleibt als einfacher technischer Leseendpunkt vorhanden.
 
 == Entwicklungsvorgehen
 
-Die Entwicklung erfolgt iterativ entlang der priorisierten User Stories. Zuerst wird ein durchgängiger Kernablauf von der Ausschreibung bis zur bewerteten Bewerbung umgesetzt; weitere Must-, Should- und Could-Have-Stories werden anschliessend in dieser Reihenfolge ergänzt. Jede Iteration umfasst Implementierung, angemessene automatisierte Tests, eine kurze Überprüfung der Qualitätsziele und einen Eintrag im Arbeitsjournal. Technisch riskante oder noch offene Entscheide werden früh mit kleinen Versuchen geprüft und als ADR dokumentiert.
+Die Umsetzung begann mit Datenbankanbindung und einem einfachen API-Endpunkt. Anschliessend wurden Anmeldung, Gesellschaften, Wohnungen und der Ablauf von der Ausschreibung bis zur Bewerbung integriert. Antwortpräferenzen, Gewichtung, Rangliste und Export ergänzten diesen Kernablauf. Architekturentscheidungen sind als ADR festgehalten; das Arbeitsjournal dokumentiert die zeitliche Entwicklung.

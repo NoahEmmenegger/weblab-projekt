@@ -5,16 +5,8 @@
 #table(
   columns: (28%, 72%),
   table.header([*Artefakt*], [*Fundort*]),
-  [Git-Repository], [[URL]],
-  [Produktive Applikation], [[URL oder Startanleitung]],
-  [Testberichte], [[Pfad/URL]],
-  [Lighthouse-Berichte], [[Pfad/URL]],
-  [API-Dokumentation], [[Pfad/URL, falls vorhanden]],
+  [Git-Repository], [#link("https://github.com/NoahEmmenegger/weblab-projekt")[github.com/NoahEmmenegger/weblab-projekt]],
+  [Startanleitung], [`README.md`, Abschnitt "Docker Compose"],
+  [Automatisierte Tests], [`tests/assessment.test.ts` und `tests/database.integration.test.ts`; Ausführung im `README.md` beschrieben],
+  [Projektvorschlag], [`Doc/projektvorschlag.typ`],
 )
-
-== Ergänzende Unterlagen
-
-// Nur Material aufnehmen, das im Haupttext referenziert wird, z. B. detaillierter Testbericht,
-// Screenshots, vollständige Anforderungsliste oder Bedienungsanleitung.
-
-[Zusätzliche, im Haupttext referenzierte Inhalte]

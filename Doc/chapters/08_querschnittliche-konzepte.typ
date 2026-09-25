@@ -10,7 +10,7 @@ Drizzle definiert in `db/schema.ts` Benutzer, Sitzungen, Gesellschaften, Wohnung
 
 == Benutzeroberfläche und Responsive Design
 
-Die Anwendung verwendet das Next.js-App-Layout mit deutscher Dokumentensprache und Metadaten. Dashboard, Dialoge und öffentliches Bewerbungsformular sind umgesetzt. Interaktive Bereiche sind Client Components; geschützte Daten werden serverseitig geladen und geprüft. Formale Accessibility-Tests sind noch offen.
+Die Anwendung verwendet das Next.js-App-Layout mit deutscher Dokumentensprache und Metadaten. Dashboard, Dialoge und öffentliches Bewerbungsformular sind umgesetzt. Interaktive Bereiche sind Client Components; geschützte Daten werden serverseitig geladen und geprüft.
 
 == Fehlerbehandlung und Logging
 
@@ -29,5 +29,4 @@ Zugangsdaten liegen in `.env` und sind von Git ausgeschlossen. Docker Compose ve
   [Build], [Produktionsbundle und Route-Typen prüfen], [`npm run build`],
   [Unit], [Gewichtung, Eingabeprüfung und Ranking prüfen], [`npm test`: automatisierte Tests mit dem Node.js-Test-Runner],
   [Integration], [Persistenz und Auswertung mit PostgreSQL prüfen], [`npm run test:integration` mit separater `TEST_DATABASE_URL`; Ausführung benötigt eine migrierte Testdatenbank],
-  [E2E/Qualität], [Kritische Browser-Journeys, Performance und Accessibility prüfen], [Noch offen; vor fachlicher Fertigstellung ergänzen],
 )

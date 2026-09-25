@@ -6,7 +6,7 @@
   rect(width: 100%, inset: 18pt)[
     #align(center)[
       *Browser* \
-      ↓ HTTPS \
+      ↓ HTTP (lokal) \
       *Next.js-Anwendung* \
       App Router · React UI · serverseitige Endpunkte · Fachmodule · Datenzugriff \
       ↓ ORM / PostgreSQL-Protokoll \
@@ -19,7 +19,7 @@
 #table(
   columns: (25%, 45%, 30%),
   table.header([*Baustein*], [*Verantwortung*], [*Schnittstellen*]),
-  [App Router und UI], [Ordnet URLs zu, rendert Seiten und verarbeitet Benutzerinteraktionen.], [HTTPS sowie interne Aufrufe],
+  [App Router und UI], [Ordnet URLs zu, rendert Seiten und verarbeitet Benutzerinteraktionen.], [HTTP im lokalen Betrieb sowie interne Aufrufe],
   [Serverseitige Endpunkte], [Authentisierung, Validierung und Orchestrierung der Anwendungsfälle mit Route Handlers und/oder Server Actions.], [HTTP oder interne Server-Aufrufe],
   [Fachmodule], [Regeln für Ausschreibungen, Formulare, Kriterien, Bewerbungen, Bewertungen und Export.], [Typsichere Modulgrenzen],
   [Datenzugriff], [Kapselt Abfragen, Transaktionen und Schema-Migrationen.], [ORM],
@@ -49,6 +49,6 @@ Die Funktionen in `lib/answer-preferences.ts` und `lib/field-weights.ts` sind be
 
 == Ebene 2: Persistenz
 
-Das ORM bildet das relationale PostgreSQL-Schema auf TypeScript-Typen ab und verwaltet versionierte Migrationen. Nur serverseitiger Code erhält Zugriff auf die Datenbankverbindung. Bewerbungsantworten und die zum Einreichungszeitpunkt verwendeten Formularfelder werden in `listing_applications` gespeichert; die Rangfolge wird aus diesen Daten berechnet.
+Das ORM bildet das relationale PostgreSQL-Schema auf TypeScript-Typen ab und verwaltet versionierte Migrationen. Nur serverseitiger Code erhält Zugriff auf die Datenbankverbindung. Bewerbungsantworten und die zum Einreichungszeitpunkt verwendeten Formularfelder werden in `listing_applications` gespeichert. Die Rangfolge ergibt sich aus den Antworten und den aktuellen Bewertungsregeln der Ausschreibung.
 
 `db/schema.ts` ist die verbindliche Drizzle-Definition für Benutzer, Sitzungen, Gesellschaften, Wohnungen, Ausschreibungen und Bewerbungen. SQL-Migrationen liegen versioniert in `drizzle/`. Der Pool und der Drizzle-Client befinden sich in `db/index.ts` und werden nicht in Client Components importiert.

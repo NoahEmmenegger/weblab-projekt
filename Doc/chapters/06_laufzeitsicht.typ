@@ -4,7 +4,7 @@
 
 1. Eine Bewerberin oder ein Bewerber öffnet die durch den Next.js App Router bereitgestellte Formularroute. Navigation, Footer und Formularrahmen werden serverseitig gerendert.
 2. Interaktive Formularteile werden als Client Components aktiviert. Sie prüfen unmittelbar erkennbare Eingabefehler und senden die Bewerbung an einen serverseitigen Endpunkt der Next.js-Anwendung.
-3. Der Endpunkt prüft Zugangsschlüssel, Ausschreibungsstatus und Eingaben erneut auf dem Server und ruft das Fachmodul auf.
+3. Die Server Action prüft den Veröffentlichungsstatus der Ausschreibung und validiert die Eingaben erneut.
 4. Die Server Action speichert die Antworten und eine Kopie der verwendeten Formularfelder über Drizzle in PostgreSQL. Die Rangfolge wird beim Anzeigen der Bewerbungen aus den gespeicherten Daten berechnet.
 5. Bei Erfolg zeigt die Client Component eine Bestätigung. Bei einem erwarteten Fehler bleiben die Eingaben erhalten und die Oberfläche zeigt eine verständliche Meldung.
 
@@ -15,7 +15,7 @@
 3. Für eine ausgewählte Ausschreibung ruft die Client Component eine Server Action auf. Diese prüft die Berechtigung und lädt die Bewerbungen aus PostgreSQL.
 4. Die datenbankfreie Bewertungsfunktion berechnet im Browser die Rangfolge für die Anzeige. Der CSV-Export berechnet dieselbe Rangfolge separat auf dem Server.
 
-== Datenbank beim gemeinsamen Start noch nicht bereit
+== Startreihenfolge der Datenbankdienste
 
 1. Docker Compose startet die Services `db`, `migrate` und `web`.
 2. PostgreSQL initialisiert das Datenverzeichnis und meldet seinen Zustand über einen Healthcheck.

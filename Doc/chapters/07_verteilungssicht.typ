@@ -5,7 +5,7 @@
 #figure(
   rect(width: 100%, inset: 18pt)[
     #align(center)[
-      *Browser* → HTTPS / Reverse Proxy → *Service `web` (Next.js)* \
+      *Browser* → HTTP / localhost:3000 → *Service `web` (Next.js)* \
       #h(30%) ↓ internes Compose-Netzwerk \
       #h(30%) *Service `db` (PostgreSQL)* → *Volume `postgres_data`* \
       *Service `migrate`* → wartet auf `db` → führt Migrationen vor `web` aus
@@ -36,25 +36,6 @@ docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
 
 Die Anwendung ist lokal über Port 3000 erreichbar. `docker compose -f docker-compose.yml -f docker-compose.local.yml down` stoppt die Dienste und erhält das Datenbank-Volume. Schemaänderungen werden vorab mit `npm run db:generate` als SQL-Migration erzeugt und versioniert; der einmalige Service `migrate` wendet sie beim nächsten Compose-Start an.
 
-== CI/CD und automatisches Deployment mit Dokploy
+== Build und Prüfungen
 
-Als Zielprozess soll jeder Push beziehungsweise Pull Request durch GitHub Actions geprüft werden. Nach einem erfolgreichen Push auf `master` soll ein nachgelagerter Deploy-Job die Dokploy-Compose-API aufrufen. Dokploy bezieht dann den neuen Commit und stellt den Compose-Stack bereit. API-Token und Compose-ID liegen als GitHub-Secrets vor; produktive Datenbankzugänge bleiben in Dokploy. Die direkte Auto-Deploy-Auslösung der GitHub-Integration muss für diesen Ablauf deaktiviert sein, damit kein ungeprüfter Push die CI-Stufen umgeht. Die #link("https://docs.dokploy.com/docs/core/auto-deploy")[Dokploy-Dokumentation zu Auto Deploy] und die #link("https://docs.dokploy.com/docs/api/compose")[Compose-API-Referenz] beschreiben die verfügbaren Auslöser.
-
-#figure(
-  rect(width: 100%, inset: 16pt)[
-    #align(center)[
-      *Git Push / Pull Request* \
-      ↓ \
-      *GitHub Actions: `npm ci` → Typecheck → Lint → Build* \
-      ↓ erfolgreicher Push auf `master` \
-      *Deploy-Job → Dokploy-Compose-API → Compose-Build → `db` → `migrate` → `web`* \
-      ↓ \
-      *Anwendung über HTTPS erreichbar*
-    ]
-  ],
-  caption: [Vorgesehene CI/CD- und Deployment-Kette],
-)
-
-Die Qualitätsstufen verwenden die bereits vorhandenen Skripte `npm run typecheck`, `npm run lint` und `npm run build`. Dokploy benötigt dazu das Git-Repository, den produktiven Branch, die Compose-Datei, eine Domain mit HTTPS sowie produktive Umgebungsvariablen. Vor dem Livebetrieb sind ausserdem Backup und Restore der PostgreSQL-Daten und ein überprüfbarer Umgang mit fehlgeschlagenen Deployments erforderlich.
-
-*Umsetzungsstand:* Im Repository sind `Dockerfile`, Compose-Dateien und die Prüfbefehle vorhanden. Eine GitHub-Actions-Workflow-Datei ist derzeit nicht versioniert; eine Dokploy-Konfiguration ist im Repository nicht sichtbar. Die automatische Auslösung und ein erfolgreiches Live-Deployment sind daher mit dem vorliegenden Projektstand nicht nachgewiesen.
+Das `Dockerfile` erstellt ein Next.js-Standalone-Bundle. Die Skripte `npm run typecheck`, `npm run lint`, `npm test` und `npm run build` prüfen Typen, Stilregeln, Bewertungslogik und Produktions-Build. Der Datenbank-Integrationstest wird mit `npm run test:integration` gegen eine separate Testdatenbank ausgeführt.

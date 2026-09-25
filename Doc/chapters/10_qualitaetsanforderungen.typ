@@ -2,8 +2,6 @@
 
 == Qualitätsbaum
 
-// Qualitätsziele aus Kapitel 1 in Teilmerkmale zerlegen, z. B. Benutzbarkeit → responsiv, zugänglich.
-
 - Qualität
   - Nachvollziehbarkeit: deterministische Bewertung, erklärbare Teilbewertungen
   - Benutzbarkeit: responsive Bedienung, verständliche Rückmeldungen
@@ -26,3 +24,14 @@
 == Evaluationsergebnisse
 
 Am 25.09.2026 bestanden vier automatisierte Unit-Tests für Gewichtung, Validierung und Ranking (`npm test`). Ein PostgreSQL-Integrationstest für persistierte Ausschreibungen, Bewerbungen und ihre Auswertung bestand ebenfalls (`npm run test:integration`). Der Integrationstest lief nach Anwendung der Migrationen gegen eine separate lokale Testdatenbank. Die Testfälle liegen in `tests/`.
+
+#pagebreak(weak: true)
+
+== Lighthouse-Score
+
+Der Screenshot zeigt 99 Punkte für Leistung, 95 für Barrierefreiheit, 82 für Best Practices und 100 für SEO. Eine separate Desktop-Messung von `/dashboard` ergab nahezu gleiche Werte (100/95/81/100).
+
+#figure(
+  image("../assets/images/lighthouse.png", width: 100%),
+  caption: [Lighthouse-Ergebnis der Live-Anwendung],
+)

@@ -1,6 +1,3 @@
 = Kurzfassung
 
-// In 5–10 Sätzen: Problem, Ziel, umgesetzte Lösung, wichtigste Architekturentscheidung
-// und Ergebnis zusammenfassen. Erst am Projektende finalisieren.
-
-[Kurzfassung des Projekts]
+Die Anwendung unterstützt Immobiliengesellschaften und Genossenschaften bei der Verwaltung von Wohnungen, Ausschreibungen und Bewerbungen. Mitarbeitende erfassen Wohnungen, gestalten Bewerbungsformulare mit gewichteten Antwortpräferenzen und veröffentlichen die Formulare über einen Link. Eingereichte Bewerbungen werden in PostgreSQL gespeichert, anhand der festgelegten Präferenzen miteinander verglichen und im Dashboard mit Beiträgen pro Kriterium angezeigt. Ein CSV-Export stellt Bewerbungen und Bewertungen bereit. Die Anwendung ist als Next.js-Monolith mit React, Server Actions und Drizzle ORM umgesetzt und lässt sich mit Docker Compose starten. Automatisierte Unit- und Datenbank-Integrationstests prüfen Gewichtung, Bewertung und Persistenz.

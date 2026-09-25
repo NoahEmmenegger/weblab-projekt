@@ -38,6 +38,7 @@
   supervisor: "",
   expert: "",
   client: "",
+  live-url: "",
   public: false,
   secret: false,
   show-declaration: true,
@@ -108,8 +109,18 @@
     document-property(title: t(language: language, key: "program"), info: study-program)
 
     document-property(title: t(language: language, key: "year"), info: year)
-    document-property(title: t(language: language, key: "supervisor"), info: supervisor)
+    if supervisor != "" {
+      document-property(title: t(language: language, key: "supervisor"), info: supervisor)
+    }
     document-property(title: t(language: language, key: "client"), info: client)
+
+    if live-url != "" {
+      v(1.5em)
+      rect(width: 100%, inset: 12pt, fill: rgb("#EAF2FF"), stroke: rgb("#3767A6"))[
+        *Live-Anwendung online ansehen* \
+        #link(live-url)[#live-url]
+      ]
+    }
 
     v(.5em)
 
