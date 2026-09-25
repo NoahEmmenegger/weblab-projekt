@@ -3,19 +3,26 @@ import { Pool } from "pg";
 
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL must be set to connect to PostgreSQL.");
-}
-
 const globalForDatabase = globalThis as unknown as { pool?: Pool };
 
-const pool =
-  globalForDatabase.pool ?? new Pool({ connectionString });
+function createDatabase() {
+  const connectionString = process.env.DATABASE_URL;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDatabase.pool = pool;
+  if (!connectionString) {
+    throw new Error("DATABASE_URL must be set to connect to PostgreSQL.");
+  }
+
+  const pool = globalForDatabase.pool ?? new Pool({ connectionString });
+
+  if (process.env.NODE_ENV !== "production") {
+    globalForDatabase.pool = pool;
+  }
+
+  return drizzle({ client: pool, schema });
 }
 
-export const db = drizzle({ client: pool, schema });
+let database: ReturnType<typeof createDatabase> | undefined;
+
+export function getDb() {
+  return (database ??= createDatabase());
+}
