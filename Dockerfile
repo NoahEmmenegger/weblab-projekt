@@ -9,6 +9,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
+ARG SERVER_ACTION_ALLOWED_ORIGINS
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
