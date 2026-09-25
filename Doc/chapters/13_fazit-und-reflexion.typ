@@ -23,3 +23,5 @@ Rückblickend hätte ich konkrete Akzeptanzkriterien für die priorisierten User
 == Zielerreichung
 
 Umgesetzt wurden die Verwaltung von Gesellschaften und Wohnungen, individuelle Ausschreibungen, öffentliche Bewerbungsformulare, die gewichtete Auswertung eingegangener Bewerbungen und ein CSV-Export. Die Anwendung speichert ihre Daten in PostgreSQL und kann mit Docker Compose gestartet werden. Vier Unit-Tests und ein Datenbank-Integrationstest bestanden am 25.09.2026; Typecheck, Lint und Produktions-Build liefen ebenfalls erfolgreich. Die Bewertungsbeiträge sind für jede Bewerbung im Dashboard und im Export nachvollziehbar.
+
+Einige im ursprünglichen Projektvorschlag als Must Have priorisierte Funktionen wurden im verfügbaren Zeitrahmen nicht mehr umgesetzt: eine auswertbare Musterbewerbung, das Sperren der Kriterien und Gewichtungen vor Beginn der Ausschreibung, ein optionaler Zugangsschlüssel für das öffentliche Formular und das Markieren einer ausgewählten Bewerbung. Ich priorisierte stattdessen den durchgängigen Ablauf von der Ausschreibung über die Bewerbung bis zur nachvollziehbaren Auswertung und zum Export sowie dessen stabilen Betrieb.
